@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI & Food Systems — Thomas Changarathil</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;700;800&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --void:      #090e0a;
+  --deep:      #0e160f;
+  --forest:    #152117;
+  --grove:     #1c2e1e;
+  --canopy:    #263d28;
+  --leaf:      #3a5c3c;
+  --sage:      #5a8a5e;
+  --mist:      #8aaa8c;
+  --frost:     #c2d4c4;
+  --snow:      #eef4ee;
+  --white:     #f8faf8;
+  --ember:     #d4602a;
+  --ember-lt:  #e07848;
+  --gold:      #c89010;
+  --amber:     #daa820;
+  --cream:     #f2ead8;
+
+  --nav-h: 56px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  background: var(--void);
+  color: var(--snow);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+/* ═══════════════════════════════════════════
+   CUSTOM CURSOR
+═══════════════════════════════════════════ */
+.cursor {
+  position: fixed;
+  width: 10px; height: 10px;
+  background: var(--ember);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: transform 0.1s, width 0.3s var(--ease), height 0.3s var(--ease), background 0.3s;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1px solid rgba(212,96,42,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: transform 0.18s var(--ease), width 0.4s var(--ease), height 0.4s var(--ease), opacity 0.3s;
+}
+body:hover .cursor-ring { opacity: 1; }
+
+/* ═══════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  background: rgba(9,14,10,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--forest);
+  transition: border-color 0.3s;
+}
+
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+  color: var(--white);
+}
+.nav-logo span { color: var(--ember); }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mist);
+  transition: color 0.2s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 0; right: 100%;
+  height: 1px;
+  background: var(--ember);
+  transition: right 0.3s var(--ease);
+}
+.nav-links a:hover { color: var(--white); }
+.nav-links a:hover::after { right: 0; }
+
+.nav-year {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--leaf);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ═══════════════════════════════════════════
+   SHARED PRIMITIVES
+═══════════════════════════════════════════ */
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--ember);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 20px;
+}
+.eyebrow.gold { color: var(--amber); }
+.eyebrow.sage { color: var(--sage); }
+
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--white);
+  letter-spacing: -0.02em;
+}
+
+.section-body {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--frost);
+}
+.section-body p { margin-bottom: 16px; }
+.section-body p:last-child { margin-bottom: 0; }
+
+.rule {
+  height: 1px;
+  background: var(--canopy);
+}
+
+.tag {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid var(--canopy);
+  color: var(--mist);
+  font-family: 'DM Sans', sans-serif;
+}
+.tag.active { border-color: var(--ember); color: var(--ember); }
+
+/* ═══════════════════════════════════════════
+   § 0 — HERO
+═══════════════════════════════════════════ */
+#hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: calc(var(--nav-h) + 60px) 60px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--forest) 1px, transparent 1px),
+    linear-gradient(90deg, var(--forest) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.hero-bg-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(42,74,44,0.3) 0%, transparent 70%);
+  top: 20%; left: -100px;
+  pointer-events: none;
+  animation: glow-drift 12s ease-in-out infinite alternate;
+}
+
+@keyframes glow-drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(60px, -40px); }
+}
+
+.hero-top {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 40px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--canopy);
+  position: relative;
+  z-index: 1;
+}
+
+.hero-headline {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(48px, 8vw, 100px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--white);
+}
+
+.hero-headline em {
+  font-style: italic;
+  color: var(--mist);
+}
+
+.hero-right {
+  max-width: 280px;
+  padding-bottom: 4px;
+}
+
+.hero-right-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.hero-right-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--mist);
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+}
+
+.hero-bottom {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--canopy);
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-stat {
+  background: var(--void);
+  padding: 28px 24px;
+  transition: background 0.3s;
+}
+
+.hero-stat:hover { background: var(--forest); }
+
+.hero-stat-value {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 36px;
+  color: var(--ember);
+  line-height: 1;
+  margin-bottom: 6px;
+  letter-spacing: -0.03em;
+}
+
+.hero-stat-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+/* ═══════════════════════════════════════════
+   § 1 — THE PROBLEM
+═══════════════════════════════════════════ */
+#problem {
+  padding: 120px 60px;
+  background: var(--deep);
+  position: relative;
+  overflow: hidden;
+}
+
+.problem-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: start;
+}
+
+.problem-left {}
+
+.problem-statement {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(22px, 3.5vw, 32px);
+  font-style: italic;
+  color: var(--frost);
+  line-height: 1.45;
+  margin-top: 32px;
+  margin-bottom: 40px;
+  padding-left: 20px;
+  border-left: 3px solid var(--ember);
+}
+
+.problem-right {
+  padding-top: 60px;
+}
+
+.feedback-loop {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.feedback-loop::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 32px;
+  bottom: 32px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--ember), var(--leaf));
+  opacity: 0.4;
+}
+
+.loop-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px 0;
+  position: relative;
+}
+
+.loop-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--ember);
+  margin-top: 6px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  margin-left: 16px;
+}
+
+.loop-dot.green { background: var(--sage); }
+
+.loop-content {}
+
+.loop-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  color: var(--white);
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+
+.loop-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--mist);
+}
+
+.loop-connector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0 4px 24px;
+}
+
+.loop-connector-text {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--leaf);
+}
+
+/* ═══════════════════════════════════════════
+   § 2 — METHODOLOGY
+═══════════════════════════════════════════ */
+#methodology {
+  padding: 120px 60px;
+  background: var(--void);
+  border-top: 1px solid var(--canopy);
+}
+
+.method-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-bottom: 80px;
+}
+
+.method-desc {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--frost);
+  padding-top: 8px;
+}
+
+.horizons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--canopy);
+  margin-bottom: 60px;
+}
+
+.horizon-card {
+  background: var(--forest);
+  padding: 40px 32px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+
+.horizon-card:hover { background: var(--grove); }
+
+.horizon-card::before {
+  content: attr(data-h);
+  position: absolute;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 120px;
+  line-height: 1;
+  bottom: -20px;
+  right: -10px;
+  color: var(--canopy);
+  pointer-events: none;
+}
+
+.horizon-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--ember);
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.horizon-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--white);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.horizon-desc {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--frost);
+  position: relative;
+  z-index: 1;
+}
+
+.participants-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--canopy);
+}
+
+.participant-cell {
+  background: var(--deep);
+  padding: 20px 16px;
+  text-align: center;
+  transition: background 0.3s;
+}
+
+.participant-cell:hover { background: var(--grove); }
+
+.participant-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.participant-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--mist);
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════
+   § 3 — FINDINGS
+═══════════════════════════════════════════ */
+#findings {
+  padding: 120px 60px;
+  background: var(--deep);
+  border-top: 1px solid var(--canopy);
+}
+
+.findings-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-bottom: 80px;
+  align-items: end;
+}
+
+.emergent-system {
+  background: var(--forest);
+  padding: 48px;
+  margin-bottom: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.emergent-system::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(to right, var(--ember), var(--amber), var(--sage));
+}
+
+.emergent-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.emergent-sub {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 32px;
+}
+
+.driver-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.driver-card {
+  background: var(--grove);
+  padding: 24px;
+}
+
+.driver-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.driver-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--white);
+  margin-bottom: 10px;
+}
+
+.driver-text {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--frost);
+}
+
+.outcomes-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--white);
+  margin-bottom: 32px;
+}
+
+.outcomes-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--canopy);
+  margin-bottom: 80px;
+}
+
+.outcome-row {
+  background: var(--forest);
+  padding: 28px 32px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: start;
+  transition: background 0.3s;
+}
+
+.outcome-row:hover { background: var(--grove); }
+
+.outcome-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--canopy);
+  line-height: 1;
+  -webkit-text-stroke: 1px var(--leaf);
+}
+
+.outcome-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--white);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.outcome-text {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--mist);
+}
+
+.leverage-section {
+  background: var(--void);
+  padding: 48px;
+  border: 1px solid var(--canopy);
+}
+
+.leverage-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.leverage-sub {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 32px;
+}
+
+.leverage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.leverage-item {
+  padding: 20px;
+  background: var(--forest);
+  border-left: 3px solid transparent;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.leverage-item:hover {
+  border-left-color: var(--ember);
+  background: var(--grove);
+}
+
+.leverage-item-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px;
+  color: var(--white);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.leverage-item-text {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--mist);
+}
+
+/* ═══════════════════════════════════════════
+   § 4 — ARTIFACTS
+═══════════════════════════════════════════ */
+#artifacts {
+  padding: 120px 60px;
+  background: var(--void);
+  border-top: 1px solid var(--canopy);
+}
+
+.artifacts-header {
+  margin-bottom: 72px;
+  max-width: 600px;
+}
+
+.artifacts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--canopy);
+  margin-bottom: 1px;
+}
+
+.artifact-card {
+  background: var(--forest);
+  padding: 48px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s var(--ease);
+  cursor: pointer;
+}
+
+.artifact-card:hover {
+  background: var(--grove);
+}
+
+.artifact-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 100%;
+  height: 2px;
+  background: var(--ember);
+  transition: right 0.5s var(--ease);
+}
+
+.artifact-card:hover::before { right: 0; }
+
+.artifact-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--leaf);
+  margin-bottom: 32px;
+  display: block;
+}
+
+.artifact-icon-area {
+  margin-bottom: 28px;
+}
+
+.artifact-icon {
+  width: 56px; height: 56px;
+  background: var(--canopy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.artifact-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.artifact-type {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 16px;
+  display: block;
+}
+
+.artifact-desc {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--mist);
+  flex: 1;
+  margin-bottom: 32px;
+}
+
+.artifact-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.artifact-btn {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border: 1px solid var(--canopy);
+  color: var(--mist);
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  background: transparent;
+}
+
+.artifact-btn:hover {
+  border-color: var(--ember);
+  color: var(--white);
+  background: rgba(212,96,42,0.1);
+}
+
+.artifact-btn.primary {
+  border-color: var(--ember);
+  color: var(--ember);
+}
+
+.artifact-btn.primary:hover {
+  background: var(--ember);
+  color: var(--white);
+}
+
+/* Coming soon card */
+.artifact-card.soon {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
+   § 5 — 2026 UPDATE
+═══════════════════════════════════════════ */
+#update {
+  padding: 120px 60px;
+  background: var(--deep);
+  border-top: 1px solid var(--canopy);
+  position: relative;
+  overflow: hidden;
+}
+
+.update-bg {
+  position: absolute;
+  right: -200px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 400px;
+  color: var(--forest);
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+}
+
+.update-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-bottom: 72px;
+  position: relative;
+  z-index: 1;
+}
+
+.update-year-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--grove);
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  border: 1px solid var(--canopy);
+}
+
+.update-year-from {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--mist);
+  text-decoration: line-through;
+  text-decoration-color: var(--ember);
+}
+
+.update-year-arrow {
+  color: var(--ember);
+  font-size: 16px;
+}
+
+.update-year-to {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--amber);
+}
+
+.update-desc {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--frost);
+  padding-top: 8px;
+}
+
+.update-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--canopy);
+  position: relative;
+  z-index: 1;
+  margin-bottom: 60px;
+}
+
+.update-card {
+  background: var(--forest);
+  padding: 36px 32px;
+  transition: background 0.3s;
+}
+
+.update-card:hover { background: var(--grove); }
+
+.update-card-status {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid;
+}
+
+.status-validated { color: var(--sage); border-color: var(--sage); }
+.status-evolved   { color: var(--amber); border-color: var(--amber); }
+.status-open      { color: var(--ember); border-color: var(--ember); }
+.status-new       { color: var(--frost); border-color: var(--canopy); }
+
+.update-card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 19px;
+  color: var(--white);
+  margin-bottom: 10px;
+  line-height: 1.25;
+}
+
+.update-card-text {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--mist);
+}
+
+.whats-next {
+  background: var(--void);
+  padding: 48px;
+  border: 1px solid var(--canopy);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.whats-next-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  color: var(--white);
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.whats-next-text {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--frost);
+  margin-bottom: 16px;
+}
+
+.next-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.next-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--canopy);
+  align-items: baseline;
+}
+
+.next-step:last-child { border-bottom: none; }
+
+.next-step-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--ember);
+  letter-spacing: 1px;
+}
+
+.next-step-text {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--frost);
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  padding: 48px 60px;
+  background: var(--void);
+  border-top: 1px solid var(--canopy);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 40px;
+}
+
+.footer-left {}
+
+.footer-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.footer-logo span { color: var(--ember); }
+
+.footer-meta {
+  font-size: 12px;
+  color: var(--leaf);
+  line-height: 1.7;
+}
+
+.footer-right {
+  text-align: right;
+  font-size: 12px;
+  color: var(--leaf);
+  line-height: 1.8;
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 900px) {
+  nav { padding: 0 24px; }
+  nav .nav-links { display: none; }
+  #hero { padding: 100px 24px 40px; }
+  .hero-top { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .hero-bottom { grid-template-columns: repeat(2, 1fr); }
+  #problem, #methodology, #findings, #artifacts, #update { padding: 80px 24px; }
+  .problem-layout, .method-header, .findings-intro, .update-header, .whats-next { grid-template-columns: 1fr; gap: 40px; }
+  .horizons-grid, .driver-grid, .leverage-grid, .artifacts-grid, .update-cards { grid-template-columns: 1fr; }
+  .outcomes-list { grid-template-columns: 1fr; }
+  .participants-row { grid-template-columns: repeat(4, 1fr); }
+  footer { grid-template-columns: 1fr; }
+  .footer-right { text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="nav-logo"><span>AI</span> & Food Systems</div>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#methodology">Method</a></li>
+    <li><a href="#findings">Findings</a></li>
+    <li><a href="#artifacts">Artifacts</a></li>
+    <li><a href="#update">2026</a></li>
+  </ul>
+  <div class="nav-year">2022 → 2026</div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-bg-glow"></div>
+
+  <div class="hero-top">
+    <div>
+      <span class="eyebrow" style="margin-bottom:28px;">Major Research Project · MDes SFI · OCAD University</span>
+      <h1 class="hero-headline">
+        AI &<br>
+        <em>Food</em><br>
+        Systems
+      </h1>
+    </div>
+    <div class="hero-right">
+      <span class="hero-right-label">The inquiry</span>
+      <p class="hero-right-text">How might artificial intelligence accelerate the transition towards circular urban food systems in Canada — and what values must guide that transition?</p>
+    </div>
+  </div>
+
+  <div class="hero-bottom">
+    <div class="hero-stat reveal">
+      <div class="hero-stat-value">9</div>
+      <div class="hero-stat-label">Workshop participants across 6 disciplines</div>
+    </div>
+    <div class="hero-stat reveal reveal-delay-1">
+      <div class="hero-stat-value">3H</div>
+      <div class="hero-stat-label">Three Horizons futures methodology</div>
+    </div>
+    <div class="hero-stat reveal reveal-delay-2">
+      <div class="hero-stat-value">7</div>
+      <div class="hero-stat-label">LASERRS framework components</div>
+    </div>
+    <div class="hero-stat reveal reveal-delay-3">
+      <div class="hero-stat-value">+4</div>
+      <div class="hero-stat-label">Years of reflection, 2022 → 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROBLEM ═══ -->
+<section id="problem">
+  <div class="problem-layout">
+    <div class="problem-left">
+      <span class="eyebrow reveal">The Problem Space</span>
+      <h2 class="section-title reveal">The system<br>feeding us is<br>breaking us.</h2>
+      <blockquote class="problem-statement reveal">
+        Canada's urban food systems are caught in a reinforcing feedback loop: the way we produce food drives climate change, and climate change destroys the conditions under which food can be produced.
+      </blockquote>
+      <div class="section-body reveal">
+        <p>Food systems account for nearly a third of Canada's greenhouse gas emissions. Cities, where demand is highest, hold almost no local production capacity. Supply chains optimized for efficiency have no redundancy. And the entire apparatus runs on a value system that prioritizes profit over people and growth over soil health.</p>
+        <p>This is not a technology problem. It is a values and systems problem — one that technology can accelerate solving, if it's pointed in the right direction.</p>
+      </div>
+    </div>
+
+    <div class="problem-right reveal">
+      <div class="feedback-loop">
+        <div class="loop-item">
+          <div class="loop-dot"></div>
+          <div class="loop-content">
+            <div class="loop-title">Industrial food production</div>
+            <div class="loop-text">Monocultures, pesticides, long supply chains, and overproduction to serve global markets — not local needs.</div>
+          </div>
+        </div>
+        <div class="loop-connector">
+          <div class="loop-connector-text">drives ↓</div>
+        </div>
+        <div class="loop-item">
+          <div class="loop-dot"></div>
+          <div class="loop-content">
+            <div class="loop-title">GHG emissions &amp; soil degradation</div>
+            <div class="loop-text">~30% of Canada's total emissions. Depleted land with decreasing long-term agricultural viability.</div>
+          </div>
+        </div>
+        <div class="loop-connector">
+          <div class="loop-connector-text">drives ↓</div>
+        </div>
+        <div class="loop-item">
+          <div class="loop-dot"></div>
+          <div class="loop-content">
+            <div class="loop-title">Climate change acceleration</div>
+            <div class="loop-text">Extreme weather, flooding, wildfire, drought — all increasing in frequency and severity.</div>
+          </div>
+        </div>
+        <div class="loop-connector">
+          <div class="loop-connector-text">threatens ↓</div>
+        </div>
+        <div class="loop-item">
+          <div class="loop-dot green"></div>
+          <div class="loop-content">
+            <div class="loop-title">Food system resilience &amp; security</div>
+            <div class="loop-text">Supply shocks, rising prices, arable land loss. Urban food insecurity, especially for lower-income communities.</div>
+          </div>
+        </div>
+        <div class="loop-connector">
+          <div class="loop-connector-text">intensifies pressure on ↑</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ METHODOLOGY ═══ -->
+<section id="methodology">
+  <div class="method-header">
+    <div>
+      <span class="eyebrow reveal">How the research was conducted</span>
+      <h2 class="section-title reveal">The workshop<br><em>was</em> the research.</h2>
+    </div>
+    <div class="method-desc reveal">
+      <p>This project was structured as a Major Research Project in a Master of Design program — not a thesis. The Three Horizons workshop was not merely a data collection method; it was the primary research artifact. What emerged from the room — the values, visions, and leverage points — was the contribution.</p>
+      <p>A literature review on AI, circular economy, and food systems provided context and framing. The workshop synthesized expert knowledge across disciplines into a co-produced vision. The LASERRS framework emerged from affinity mapping that vision's underlying values.</p>
+    </div>
+  </div>
+
+  <div class="horizons-grid">
+    <div class="horizon-card reveal" data-h="H1">
+      <span class="horizon-num">H1 — Horizon One</span>
+      <div class="horizon-name">Status Quo</div>
+      <p class="horizon-desc">Mapping the current Canadian food system — its foundational values, defining patterns, key actors, and the outcomes it is producing. What does the system optimize for? Who does it serve? What does it threaten?</p>
+    </div>
+    <div class="horizon-card reveal reveal-delay-2" data-h="H3">
+      <span class="horizon-num">H3 — Horizon Three</span>
+      <div class="horizon-name">Desired Future</div>
+      <p class="horizon-desc">Co-envisioning a future food system for Canada. What values would it be built on? What would it look like to feed cities in a way that is regenerative, equitable, and resilient? What glimpses of this future exist today?</p>
+    </div>
+    <div class="horizon-card reveal reveal-delay-4" data-h="H2">
+      <span class="horizon-num">H2 — Horizon Two</span>
+      <div class="horizon-name">Innovation Space</div>
+      <p class="horizon-desc">The transition territory between H1 and H3. H- actions incrementally improve the status quo. H+ actions actively disrupt dominant paradigms and build toward the desired future. Where do AI interventions fit?</p>
+    </div>
+  </div>
+
+  <div class="participants-row reveal">
+    <div class="participant-cell">
+      <span class="participant-icon">🤖</span>
+      <div class="participant-label">Artificial Intelligence</div>
+    </div>
+    <div class="participant-cell">
+      <span class="participant-icon">🌾</span>
+      <div class="participant-label">Agri-Food Production</div>
+    </div>
+    <div class="participant-cell">
+      <span class="participant-icon">🏙️</span>
+      <div class="participant-label">Urban Agriculture</div>
+    </div>
+    <div class="participant-cell">
+      <span class="participant-icon">🧬</span>
+      <div class="participant-label">Biotechnology</div>
+    </div>
+    <div class="participant-cell">
+      <span class="participant-icon">🛡️</span>
+      <div class="participant-label">Critical Infrastructure</div>
+    </div>
+    <div class="participant-cell">
+      <span class="participant-icon">♻️</span>
+      <div class="participant-label">Circular Design</div>
+    </div>
+    <div class="participant-cell">
+      <span class="participant-icon">🔭</span>
+      <div class="participant-label">Foresight &amp; Design</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FINDINGS ═══ -->
+<section id="findings">
+  <div class="findings-intro">
+    <div>
+      <span class="eyebrow reveal">What the research found</span>
+      <h2 class="section-title reveal">An emergent<br>system with<br>clear leverage<br>points.</h2>
+    </div>
+    <div class="section-body reveal" style="padding-top:8px;">
+      <p>The synthesis of literature review and workshop data revealed a global food system underpinned by capitalist values — and threatened by the cascading effects of the climate change those values are accelerating. Six specific outcomes threaten food system resilience and security, each of which represents a leverage point for strategic AI intervention.</p>
+    </div>
+  </div>
+
+  <div class="emergent-system reveal">
+    <div class="emergent-title">The Emergent System</div>
+    <div class="emergent-sub">Three driving forces · Four system actors</div>
+    <div class="driver-grid">
+      <div class="driver-card">
+        <span class="driver-label">Primary Driver</span>
+        <div class="driver-title">Capitalist Values</div>
+        <p class="driver-text">Profit maximization, growth, and market efficiency shape the incentives of every actor in the food system — producers, retailers, consumers, and governments. These values prioritize feeding markets over feeding people.</p>
+      </div>
+      <div class="driver-card">
+        <span class="driver-label">Compounding Driver</span>
+        <div class="driver-title">Climate Change</div>
+        <p class="driver-text">Driven in part by food systems themselves, climate change increasingly threatens the infrastructure food systems depend on — arable land, stable weather, water supply. A reinforcing feedback loop with no natural correction mechanism.</p>
+      </div>
+      <div class="driver-card">
+        <span class="driver-label">Structural Feature</span>
+        <div class="driver-title">Globalized Supply Chains</div>
+        <p class="driver-text">Optimized for cost and year-round variety, global supply chains have extended interdependencies to the point of systemic fragility. Shocks anywhere — pandemic, war, drought — propagate everywhere.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="outcomes-title reveal">Six outcomes threatening food system resilience &amp; security</div>
+
+  <div class="outcomes-list">
+    <div class="outcome-row reveal">
+      <div class="outcome-num">01</div>
+      <div>
+        <div class="outcome-name">Centralized Production</div>
+        <p class="outcome-text">Food production concentrated in large corporations and distant geographies, reducing community food sovereignty and compounding supply chain risk.</p>
+      </div>
+    </div>
+    <div class="outcome-row reveal reveal-delay-1">
+      <div class="outcome-num">02</div>
+      <div>
+        <div class="outcome-name">Environmental Degradation</div>
+        <p class="outcome-text">Industrial farming practices erode soil health and reduce long-term agricultural viability through monocultures, chemical inputs, and overextraction.</p>
+      </div>
+    </div>
+    <div class="outcome-row reveal reveal-delay-2">
+      <div class="outcome-num">03</div>
+      <div>
+        <div class="outcome-name">Fragile Supply Chains</div>
+        <p class="outcome-text">Just-in-time delivery models and global sourcing create systems with no redundancy — one disruption anywhere cascades everywhere.</p>
+      </div>
+    </div>
+    <div class="outcome-row reveal reveal-delay-3">
+      <div class="outcome-num">04</div>
+      <div>
+        <div class="outcome-name">Systemic Waste</div>
+        <p class="outcome-text">Cosmetic rejection standards, over-production incentives, and post-consumer waste combine to discard 40–50% of global food production.</p>
+      </div>
+    </div>
+    <div class="outcome-row reveal reveal-delay-4">
+      <div class="outcome-num">05</div>
+      <div>
+        <div class="outcome-name">Premiums on Ethical Food</div>
+        <p class="outcome-text">Sustainably and ethically produced food commands prices that exclude lower-income communities, placing a structural "health tax" on poverty.</p>
+      </div>
+    </div>
+    <div class="outcome-row reveal reveal-delay-5">
+      <div class="outcome-num">06</div>
+      <div>
+        <div class="outcome-name">Cascading Climate Impacts</div>
+        <p class="outcome-text">As climate effects compound — disease, conflict, crop failure — the pressure on an already fragile system increases. Without structural change, the feedback loop accelerates.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="leverage-section reveal">
+    <div class="leverage-title">Strategic AI Leverage Points</div>
+    <div class="leverage-sub">Where AI interventions can reverse these outcomes</div>
+    <div class="leverage-grid">
+      <div class="leverage-item">
+        <div class="leverage-item-title">Decentralized Production</div>
+        <p class="leverage-item-text">AI-driven automation enabling hydroponic, aquaponic, and vertical farming at community scale — reducing supply chain dependency through local production.</p>
+      </div>
+      <div class="leverage-item">
+        <div class="leverage-item-title">Soil Regeneration</div>
+        <p class="leverage-item-text">Deep learning systems that advise farmers on crop selection and practices optimized for soil health and carbon sequestration — not yield maximization.</p>
+      </div>
+      <div class="leverage-item">
+        <div class="leverage-item-title">Supply Chain Resilience</div>
+        <p class="leverage-item-text">Predictive AI anticipating shortages, routing inefficiencies, and climate disruptions before they become crises in urban food access.</p>
+      </div>
+      <div class="leverage-item">
+        <div class="leverage-item-title">Waste Elimination</div>
+        <p class="leverage-item-text">Computer vision and dynamic pricing tools keeping food in use longer — from farm to retailer to community resource sharing networks.</p>
+      </div>
+      <div class="leverage-item">
+        <div class="leverage-item-title">Food Science Acceleration</div>
+        <p class="leverage-item-text">AI assisting research scientists in developing scalable, cost-effective alternatives — lab-grown protein, 3D-printed foods — to reduce industrial agriculture's footprint.</p>
+      </div>
+      <div class="leverage-item">
+        <div class="leverage-item-title">Early Warning Systems</div>
+        <p class="leverage-item-text">Predictive models providing advance notice of extreme weather, crop disease, and geopolitical supply threats — enabling proactive resilience rather than reactive crisis management.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ARTIFACTS ═══ -->
+<section id="artifacts">
+  <div class="artifacts-header">
+    <span class="eyebrow reveal">Outputs of the research</span>
+    <h2 class="section-title reveal">The research<br>produced artifacts,<br>not just findings.</h2>
+    <p class="section-body reveal" style="margin-top:20px; max-width:520px;">Three designed artifacts give the work its proper form — a speculative futures document, a practitioner framework, and a systems map. Each was built in 2026 as a retroactive redesign of material that deserved better than a paper.</p>
+  </div>
+
+  <div class="artifacts-grid">
+    <!-- Charter -->
+    <div class="artifact-card reveal">
+      <span class="artifact-num">01 OF 03</span>
+      <div class="artifact-icon-area">
+        <div class="artifact-icon">📜</div>
+      </div>
+      <span class="artifact-type">Speculative Document · Horizon Three</span>
+      <h3 class="artifact-title">The Urban Food Sovereignty Charter, 2045</h3>
+      <p class="artifact-desc">A speculative institutional document from the future the workshop imagined — a charter ratified across five Canadian cities, formalizing the values and commitments of a food system built on LASERRS principles. An archive from a possible future, not a prediction.</p>
+      <div class="artifact-actions">
+        <a href="charter.html" target="_blank" class="artifact-btn primary">View HTML</a>
+        <a href="charter.pdf" download class="artifact-btn">Download PDF</a>
+      </div>
+    </div>
+
+    <!-- LASERRS -->
+    <div class="artifact-card reveal reveal-delay-2">
+      <span class="artifact-num">02 OF 03</span>
+      <div class="artifact-icon-area">
+        <div class="artifact-icon">🧭</div>
+      </div>
+      <span class="artifact-type">Framework Reference Document</span>
+      <h3 class="artifact-title">LASERRS Framework</h3>
+      <p class="artifact-desc">A full reference document for the LASERRS framework — Localism, Accessibility, Sustainability &amp; Ethics for Resilience, Regeneration &amp; Security. Each component is defined, contextualized, and connected. Includes an evaluation template for practitioners orienting projects and policies.</p>
+      <div class="artifact-actions">
+        <a href="laserrs.html" target="_blank" class="artifact-btn primary">View HTML</a>
+        <a href="laserrs.pdf" download class="artifact-btn">Download PDF</a>
+      </div>
+    </div>
+
+    <!-- Systems Map -->
+    <div class="artifact-card reveal reveal-delay-4">
+      <span class="artifact-num">03 OF 03</span>
+      <div class="artifact-icon-area">
+        <div class="artifact-icon">🔄</div>
+      </div>
+      <span class="artifact-type">Interactive Causal Loop Diagram</span>
+      <h3 class="artifact-title">Emergent System Map</h3>
+      <p class="artifact-desc">An interactive causal loop diagram of the emergent system within which Canadian urban food systems exist — 14 nodes, 24 causal relationships, and four reinforcing feedback loops you can trace. Hover nodes to explore connections. Click loops to illuminate each cycle.</p>
+      <div class="artifact-actions">
+        <a href="systems-map.html" target="_blank" class="artifact-btn primary">Open Interactive Map</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2026 UPDATE ═══ -->
+<section id="update">
+  <div class="update-bg">26</div>
+
+  <div class="update-header">
+    <div>
+      <div class="update-year-badge reveal">
+        <span class="update-year-from">2022</span>
+        <span class="update-year-arrow">→</span>
+        <span class="update-year-to">2026</span>
+      </div>
+      <h2 class="section-title reveal">Four years<br>of friction.</h2>
+    </div>
+    <div class="update-desc reveal">
+      <p>The research was completed in 2022. In the years since, AI has transformed beyond what any of the workshop's AI experts anticipated. Food system disruptions have continued — and in some cases, worsened. Some of what the workshop imagined has started happening. Some of it looks more naive in hindsight. This is an honest accounting.</p>
+    </div>
+  </div>
+
+  <div class="update-cards">
+    <div class="update-card reveal">
+      <span class="update-card-status status-validated">Validated</span>
+      <div class="update-card-title">Supply chain fragility as a systemic threat</div>
+      <p class="update-card-text">Post-pandemic supply chain disruptions, the war in Ukraine, and climate-driven harvest failures have confirmed the research's central claim. Long, interconnected supply chains are a structural vulnerability, not an optimization problem.</p>
+    </div>
+    <div class="update-card reveal reveal-delay-1">
+      <span class="update-card-status status-validated">Validated</span>
+      <div class="update-card-title">AI's capabilities in food systems</div>
+      <p class="update-card-text">The AI leverage points identified in 2022 have broadly materialized — precision agriculture, waste reduction through computer vision, predictive supply chain tools. The technology was directionally right. The adoption pace is slower than anticipated.</p>
+    </div>
+    <div class="update-card reveal reveal-delay-2">
+      <span class="update-card-status status-evolved">Evolved</span>
+      <div class="update-card-title">What "AI" means has fundamentally changed</div>
+      <p class="update-card-text">The workshop discussed AI primarily as machine learning algorithms and optimization systems. Since 2022, generative AI has transformed the landscape entirely. The framework's leverage points remain valid, but the tool set available is dramatically different — and raises new governance questions.</p>
+    </div>
+    <div class="update-card reveal reveal-delay-3">
+      <span class="update-card-status status-evolved">Evolved</span>
+      <div class="update-card-title">LASERRS as sensitizing concept, not proven theory</div>
+      <p class="update-card-text">The framework was generated from a single workshop. It has not been empirically tested. Four years on, LASERRS is better understood as a design tool for practitioners than as a validated theoretical contribution. Its utility requires grounded research to substantiate.</p>
+    </div>
+    <div class="update-card reveal reveal-delay-4">
+      <span class="update-card-status status-open">Open</span>
+      <div class="update-card-title">How cities actually operationalize food resilience</div>
+      <p class="update-card-text">The research identified what cities should do. What it couldn't address was how municipal actors actually construct, negotiate, and enact food resilience as a governance problem — and what role technological imagination plays in shaping or limiting those constructions. This remains the open question.</p>
+    </div>
+    <div class="update-card reveal reveal-delay-5">
+      <span class="update-card-status status-new">New Territory</span>
+      <div class="update-card-title">Technology as imagination, not just tool</div>
+      <p class="update-card-text">What's emerged over four years is a new question: the idea of AI — what municipal actors think it can do — may shape food system decisions as much as AI's actual capabilities. The technological imagination precedes the deployment. This is where the inquiry is heading.</p>
+    </div>
+  </div>
+
+  <div class="whats-next reveal">
+    <div>
+      <h3 class="whats-next-title">The inquiry continues.</h3>
+      <p class="whats-next-text">This site is a living document, not an archive. The artifacts will expand. The 2026 update will be revised as the inquiry develops. The bridge essay and the eventual grounded theory research program will find a home here.</p>
+      <p class="whats-next-text">The research question currently being explored: <em>How do municipal actors construct and enact food system resilience as a governance problem — and what role does technological imagination play in shaping or limiting those constructions?</em></p>
+    </div>
+    <div>
+      <ul class="next-steps">
+        <li class="next-step">
+          <span class="next-step-num">01</span>
+          <span class="next-step-text">✓ Systems map complete — interactive causal loop diagram with four reinforcing feedback loops</span>
+        </li>
+        <li class="next-step">
+          <span class="next-step-num">02</span>
+          <span class="next-step-text">Write the bridge essay — positioning LASERRS toward grounded theory inquiry</span>
+        </li>
+        <li class="next-step">
+          <span class="next-step-num">03</span>
+          <span class="next-step-text">5 years of exploration — practitioner conversations, fieldwork-adjacent observation, writing</span>
+        </li>
+        <li class="next-step">
+          <span class="next-step-num">04</span>
+          <span class="next-step-text">Develop the PhD research question from friction encountered in the exploration</span>
+        </li>
+        <li class="next-step">
+          <span class="next-step-num">05</span>
+          <span class="next-step-text">Formal grounded theory study on municipal food resilience governance</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-left">
+    <div class="footer-logo"><span>AI</span> & Food Systems</div>
+    <div class="footer-meta">
+      Thomas Changarathil · MDes Strategic Foresight &amp; Innovation · OCAD University, 2022<br>
+      Redesigned and updated 2026 · CC BY 4.0
+    </div>
+  </div>
+  <div class="footer-right">
+    Research in progress<br>
+    2022 → 2026 → ongoing
+  </div>
+</footer>
+
+<script>
+/* ── Cursor ── */
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top  = my + 'px';
+});
+
+(function animRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animRing);
+})();
+
+document.querySelectorAll('a, button, .artifact-card, .horizon-card, .outcome-row').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.width  = '20px';
+    cursor.style.height = '20px';
+    ring.style.width    = '60px';
+    ring.style.height   = '60px';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.width  = '10px';
+    cursor.style.height = '10px';
+    ring.style.width    = '36px';
+    ring.style.height   = '36px';
+  });
+});
+
+/* ── Scroll reveal ── */
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+revealEls.forEach(el => observer.observe(el));
+
+/* ── Nav active section ── */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const sectObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.style.color = '');
+      const active = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+      if (active) active.style.color = 'var(--white)';
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => sectObserver.observe(s));
+</script>
+
+</body>
+</html>

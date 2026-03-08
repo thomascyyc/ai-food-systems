@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emergent System Map — AI & Food Systems</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:    #040904;
+  --deep:    #080e08;
+  --forest:  #0e180f;
+  --grove:   #162018;
+  --canopy:  #1e2e20;
+  --leaf:    #2e4a30;
+  --sage:    #4a7a4e;
+  --mist:    #7a9a7e;
+  --frost:   #b8ccba;
+  --snow:    #e8f0e8;
+  --white:   #f4f8f4;
+  --ember:   #d05828;
+  --ember-lt:#e07040;
+  --gold:    #c48c0c;
+  --amber:   #d8a018;
+  --crimson: #9a2a18;
+  --sky:     #2a7090;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; }
+
+body {
+  background: var(--void);
+  color: var(--snow);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  flex-shrink: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(4,9,4,0.95);
+  border-bottom: 1px solid var(--canopy);
+  z-index: 10;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.topbar-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mist);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.topbar-back:hover { color: var(--white); }
+.topbar-back svg { opacity: 0.6; }
+
+.topbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--canopy);
+}
+
+.topbar-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--white);
+  letter-spacing: -0.02em;
+}
+
+.topbar-subtitle {
+  font-size: 11px;
+  color: var(--mist);
+  letter-spacing: 1px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loop-btn {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border: 1px solid var(--canopy);
+  background: transparent;
+  color: var(--mist);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.loop-btn:hover { border-color: var(--mist); color: var(--white); }
+.loop-btn.active-r1 { border-color: var(--ember); color: var(--ember); background: rgba(208,88,40,0.08); }
+.loop-btn.active-r2 { border-color: var(--amber); color: var(--amber); background: rgba(216,160,24,0.08); }
+.loop-btn.active-r3 { border-color: var(--sage);  color: var(--sage);  background: rgba(74,122,78,0.08); }
+.loop-btn.active-r4 { border-color: var(--sky);   color: var(--sky);   background: rgba(42,112,144,0.08); }
+
+.btn-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+/* ── MAIN CANVAS ── */
+.canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#diagram {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── TOOLTIP ── */
+.tooltip {
+  position: absolute;
+  background: var(--forest);
+  border: 1px solid var(--canopy);
+  padding: 14px 18px;
+  max-width: 260px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 20;
+}
+
+.tooltip.visible { opacity: 1; }
+
+.tooltip-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.tooltip-type {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 8px;
+}
+
+.tooltip-desc {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--frost);
+}
+
+/* ── INFO PANEL ── */
+.info-panel {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  width: 300px;
+  background: rgba(8,14,8,0.92);
+  border: 1px solid var(--canopy);
+  backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+  z-index: 15;
+}
+
+.info-panel.hidden { transform: translateX(-340px); opacity: 0; }
+
+.info-panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--canopy);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-loop-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.info-close {
+  background: none;
+  border: none;
+  color: var(--mist);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.2s;
+}
+.info-close:hover { color: var(--white); }
+
+.info-panel-body {
+  padding: 20px;
+}
+
+.info-loop-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--white);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.info-loop-desc {
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--frost);
+  margin-bottom: 16px;
+}
+
+.info-loop-path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.path-node {
+  font-size: 11px;
+  padding: 3px 8px;
+  border: 1px solid var(--canopy);
+  color: var(--mist);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.path-arrow {
+  color: var(--leaf);
+  font-size: 14px;
+}
+
+/* ── LEGEND ── */
+.legend {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  background: rgba(8,14,8,0.92);
+  border: 1px solid var(--canopy);
+  backdrop-filter: blur(12px);
+  padding: 16px 20px;
+  z-index: 15;
+}
+
+.legend-title {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 14px;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legend-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-size: 11px;
+  color: var(--frost);
+  letter-spacing: 0.5px;
+}
+
+.legend-divider {
+  height: 1px;
+  background: var(--canopy);
+  margin: 8px 0;
+}
+
+.legend-edge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legend-line {
+  width: 28px;
+  height: 1px;
+  position: relative;
+}
+
+.legend-line::after {
+  content: '▶';
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  font-size: 10px;
+}
+
+.legend-line.reinforce { background: rgba(180,180,160,0.5); color: rgba(180,180,160,0.5); }
+.legend-line.reinforce::after { color: rgba(180,180,160,0.5); }
+
+/* ── INSTRUCTIONS ── */
+.instructions {
+  position: absolute;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--mist);
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: fade-out 1s ease 4s forwards;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Node labels */
+.node-label {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  pointer-events: none;
+  user-select: none;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="index.html" class="topbar-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      Back
+    </a>
+    <div class="topbar-divider"></div>
+    <div>
+      <div class="topbar-title">Emergent System Map</div>
+      <div class="topbar-subtitle">AI & Food Systems · Canada · 2022</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="loop-btn" id="btn-r1" onclick="highlightLoop('r1')">
+      <span class="btn-dot" style="background:var(--ember)"></span>R1 — Production Loop
+    </button>
+    <button class="loop-btn" id="btn-r2" onclick="highlightLoop('r2')">
+      <span class="btn-dot" style="background:var(--amber)"></span>R2 — Degradation Loop
+    </button>
+    <button class="loop-btn" id="btn-r3" onclick="highlightLoop('r3')">
+      <span class="btn-dot" style="background:var(--sage)"></span>R3 — Supply Loop
+    </button>
+    <button class="loop-btn" id="btn-r4" onclick="highlightLoop('r4')">
+      <span class="btn-dot" style="background:var(--sky)"></span>R4 — Waste Loop
+    </button>
+    <button class="loop-btn" id="btn-clear" onclick="clearHighlight()" style="display:none">Clear</button>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<div class="canvas-wrap">
+  <p class="instructions">Hover nodes to explore · Click loop buttons to trace feedback cycles</p>
+
+  <svg id="diagram">
+    <defs>
+      <!-- Arrow markers -->
+      <marker id="arrow-default" markerWidth="8" markerHeight="8"
+              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L8,3 z" fill="rgba(120,150,122,0.45)"/>
+      </marker>
+      <marker id="arrow-r1" markerWidth="8" markerHeight="8"
+              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L8,3 z" fill="rgba(208,88,40,0.9)"/>
+      </marker>
+      <marker id="arrow-r2" markerWidth="8" markerHeight="8"
+              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L8,3 z" fill="rgba(216,160,24,0.9)"/>
+      </marker>
+      <marker id="arrow-r3" markerWidth="8" markerHeight="8"
+              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L8,3 z" fill="rgba(74,122,78,0.9)"/>
+      </marker>
+      <marker id="arrow-r4" markerWidth="8" markerHeight="8"
+              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L8,3 z" fill="rgba(42,112,144,0.9)"/>
+      </marker>
+      <marker id="arrow-hover" markerWidth="8" markerHeight="8"
+              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L8,3 z" fill="rgba(240,240,220,0.9)"/>
+      </marker>
+
+      <!-- Glow filters -->
+      <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-amber" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-node" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="6" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- Edges layer -->
+    <g id="edges-layer"></g>
+    <!-- Loop glow layer -->
+    <g id="loop-glow-layer"></g>
+    <!-- Nodes layer -->
+    <g id="nodes-layer"></g>
+    <!-- Labels layer -->
+    <g id="labels-layer"></g>
+    <!-- Loop labels layer -->
+    <g id="loop-labels-layer"></g>
+  </svg>
+
+  <!-- Info panel -->
+  <div class="info-panel hidden" id="info-panel">
+    <div class="info-panel-header">
+      <span class="info-loop-label" id="info-loop-label">Loop Detail</span>
+      <button class="info-close" onclick="clearHighlight()">×</button>
+    </div>
+    <div class="info-panel-body">
+      <div class="info-loop-name" id="info-loop-name"></div>
+      <p class="info-loop-desc" id="info-loop-desc"></p>
+      <div class="info-loop-path" id="info-loop-path"></div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-title">Legend</div>
+    <div class="legend-items">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#d05828; box-shadow:0 0 8px rgba(208,88,40,0.6)"></div>
+        <span class="legend-label">Primary Driver</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#c48c0c; box-shadow:0 0 8px rgba(196,140,12,0.5)"></div>
+        <span class="legend-label">Intermediary Process</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#2a6a4a; box-shadow:0 0 8px rgba(42,106,74,0.5)"></div>
+        <span class="legend-label">System Actor</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#6a3a20; box-shadow:0 0 6px rgba(106,58,32,0.5)"></div>
+        <span class="legend-label">Outcome / Threat</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#1e4060; box-shadow:0 0 6px rgba(30,64,96,0.5)"></div>
+        <span class="legend-label">Environmental</span>
+      </div>
+      <div class="legend-divider"></div>
+      <div class="legend-edge">
+        <div class="legend-line reinforce"></div>
+        <span class="legend-label">Reinforcing (+)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <div class="tooltip" id="tooltip">
+    <div class="tooltip-title" id="tt-title"></div>
+    <div class="tooltip-type" id="tt-type"></div>
+    <div class="tooltip-desc" id="tt-desc"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+
+const NODES = [
+  // --- Drivers ---
+  {
+    id: 'cap_values',
+    label: 'Capitalist\nValues',
+    type: 'driver',
+    color: '#d05828',
+    glow: 'rgba(208,88,40,0.5)',
+    r: 36,
+    desc: 'The foundational value system underpinning the food system. Profit maximization, growth, and efficiency shape every actor\'s incentives — from producers to consumers to governments.',
+    typeLabel: 'Primary Driver'
+  },
+  {
+    id: 'climate',
+    label: 'Climate\nChange',
+    type: 'environmental',
+    color: '#1e4060',
+    glow: 'rgba(30,64,96,0.6)',
+    r: 32,
+    desc: 'Both a product of food systems and a threat to them. Increasing temperatures, extreme weather, and sea-level rise destabilize the conditions under which food can be produced.',
+    typeLabel: 'Compounding Driver'
+  },
+
+  // --- Intermediaries ---
+  {
+    id: 'profit_motive',
+    label: 'Profit\nMotive',
+    type: 'intermediary',
+    color: '#c48c0c',
+    glow: 'rgba(196,140,12,0.4)',
+    r: 28,
+    desc: 'The operating principle of food producers and retailers — minimize costs, maximize revenue, capture market share. Translates capitalist values into concrete food system behaviours.',
+    typeLabel: 'Intermediary Process'
+  },
+  {
+    id: 'consumer_demand',
+    label: 'Consumer\nDemands',
+    type: 'intermediary',
+    color: '#c48c0c',
+    glow: 'rgba(196,140,12,0.4)',
+    r: 28,
+    desc: 'Consumer preference for low prices, year-round variety, cosmetic perfection, and convenience. Reinforces industrial farming practices and long supply chains.',
+    typeLabel: 'Intermediary Process'
+  },
+
+  // --- Actors ---
+  {
+    id: 'food_industry',
+    label: 'Food\nIndustry',
+    type: 'actor',
+    color: '#2a6a4a',
+    glow: 'rgba(42,106,74,0.4)',
+    r: 30,
+    desc: 'Producers and retailers operating under profit-driven incentives. Actions include industrial farming, JIT delivery, supply chain expansion, cosmetic rejection of produce, and IP on seeds.',
+    typeLabel: 'System Actor'
+  },
+  {
+    id: 'government',
+    label: 'Government',
+    type: 'actor',
+    color: '#2a6a4a',
+    glow: 'rgba(42,106,74,0.4)',
+    r: 26,
+    desc: 'Balances tax revenue from the food industry, consumer food safety, and environmental protection. Currently disproportionately influenced by food industry lobbying.',
+    typeLabel: 'System Actor'
+  },
+
+  // --- Processes ---
+  {
+    id: 'industrial_farming',
+    label: 'Industrial\nFarming',
+    type: 'process',
+    color: '#8a4a20',
+    glow: 'rgba(138,74,32,0.4)',
+    r: 30,
+    desc: 'Monocultures, pesticides, herbicides, industrial equipment, and mass-scale operations. Maximizes short-term production at the cost of soil health, biodiversity, and emissions.',
+    typeLabel: 'System Process'
+  },
+  {
+    id: 'supply_chains',
+    label: 'Global Supply\nChains',
+    type: 'process',
+    color: '#8a4a20',
+    glow: 'rgba(138,74,32,0.4)',
+    r: 30,
+    desc: 'Long, complex international supply chains enable year-round variety and low prices but create systemic fragility. Optimized for efficiency with no redundancy.',
+    typeLabel: 'System Process'
+  },
+
+  // --- Outcomes ---
+  {
+    id: 'ghg',
+    label: 'GHG\nEmissions',
+    type: 'outcome',
+    color: '#6a3a20',
+    glow: 'rgba(106,58,32,0.4)',
+    r: 26,
+    desc: 'Canadian food systems account for 30–40% of national GHG emissions. Driven by land use (69%), energy (22%), industry (6%), and waste (3%).',
+    typeLabel: 'System Outcome'
+  },
+  {
+    id: 'soil_deg',
+    label: 'Soil\nDegradation',
+    type: 'outcome',
+    color: '#6a3a20',
+    glow: 'rgba(106,58,32,0.4)',
+    r: 26,
+    desc: 'Monocultures and chemical inputs deplete soil nutrients and reduce long-term agricultural viability. Reduces arable land available for future food production.',
+    typeLabel: 'System Outcome'
+  },
+  {
+    id: 'centralization',
+    label: 'Centralized\nProduction',
+    type: 'outcome',
+    color: '#6a3a20',
+    glow: 'rgba(106,58,32,0.4)',
+    r: 26,
+    desc: 'Economies of scale concentrate food production in large multinationals. Communities lose food sovereignty. Wealth flows away from local producers.',
+    typeLabel: 'System Outcome'
+  },
+  {
+    id: 'food_waste',
+    label: 'Food\nWaste',
+    type: 'outcome',
+    color: '#6a3a20',
+    glow: 'rgba(106,58,32,0.4)',
+    r: 26,
+    desc: '40–50% of global food production is discarded. Cosmetic rejection, overproduction, and post-consumer waste. Developed nations see most waste post-consumption.',
+    typeLabel: 'System Outcome'
+  },
+  {
+    id: 'fragility',
+    label: 'Supply Chain\nFragility',
+    type: 'outcome',
+    color: '#6a3a20',
+    glow: 'rgba(106,58,32,0.4)',
+    r: 26,
+    desc: 'Just-in-time delivery and global sourcing create systems with no redundancy. One disruption — a pandemic, war, or weather event — cascades across the entire network.',
+    typeLabel: 'System Outcome'
+  },
+  {
+    id: 'food_insecurity',
+    label: 'Food\nInsecurity',
+    type: 'threat',
+    color: '#8a1a10',
+    glow: 'rgba(138,26,16,0.6)',
+    r: 34,
+    desc: 'The ultimate systemic threat. Reduced availability, rising prices, supply shocks, and loss of arable land combine to threaten reliable food access — most severely for lower-income communities.',
+    typeLabel: 'Primary Threat'
+  },
+];
+
+// Edges: [from, to, label]
+const EDGES = [
+  ['cap_values',      'profit_motive',    '+'],
+  ['cap_values',      'consumer_demand',  '+'],
+  ['profit_motive',   'food_industry',    '+'],
+  ['consumer_demand', 'food_industry',    '+'],
+  ['consumer_demand', 'supply_chains',    '+'],
+  ['food_industry',   'industrial_farming','+'],
+  ['food_industry',   'supply_chains',    '+'],
+  ['government',      'supply_chains',    '+'],
+  ['industrial_farming','ghg',            '+'],
+  ['industrial_farming','soil_deg',       '+'],
+  ['industrial_farming','centralization', '+'],
+  ['industrial_farming','food_waste',     '+'],
+  ['supply_chains',   'fragility',        '+'],
+  ['supply_chains',   'ghg',              '+'],
+  ['ghg',             'climate',          '+'],
+  ['climate',         'soil_deg',         '+'],
+  ['climate',         'fragility',        '+'],
+  ['climate',         'food_insecurity',  '+'],
+  ['soil_deg',        'food_insecurity',  '+'],
+  ['fragility',       'food_insecurity',  '+'],
+  ['centralization',  'fragility',        '+'],
+  ['food_waste',      'ghg',              '+'],
+  ['food_insecurity', 'profit_motive',    '+'],
+  ['cap_values',      'government',       '+'],
+];
+
+// Reinforcing feedback loops
+const LOOPS = {
+  r1: {
+    label: 'R1',
+    color: '#d05828',
+    colorRgba: 'rgba(208,88,40,',
+    name: 'The Production Loop',
+    desc: 'Profit motive drives industrial farming, which drives GHG emissions, which accelerates climate change, which threatens food security, which intensifies pressure on the profit motive to produce more. A self-reinforcing cycle with no natural correction mechanism.',
+    nodes: ['profit_motive','industrial_farming','ghg','climate','food_insecurity','profit_motive'],
+    edges: [
+      ['profit_motive','industrial_farming'],
+      ['industrial_farming','ghg'],
+      ['ghg','climate'],
+      ['climate','food_insecurity'],
+      ['food_insecurity','profit_motive'],
+    ]
+  },
+  r2: {
+    label: 'R2',
+    color: '#d8a018',
+    colorRgba: 'rgba(216,160,24,',
+    name: 'The Degradation Loop',
+    desc: 'Industrial farming practices degrade soil quality, reducing arable land and agricultural yields over time. This threatens food security, which intensifies profit motives to extract more from remaining land — accelerating degradation.',
+    nodes: ['industrial_farming','soil_deg','food_insecurity','profit_motive','industrial_farming'],
+    edges: [
+      ['industrial_farming','soil_deg'],
+      ['soil_deg','food_insecurity'],
+      ['food_insecurity','profit_motive'],
+      ['profit_motive','industrial_farming'],
+    ]
+  },
+  r3: {
+    label: 'R3',
+    color: '#4a7a4e',
+    colorRgba: 'rgba(74,122,78,',
+    name: 'The Supply Chain Loop',
+    desc: 'Consumer demands for year-round variety and low prices drive global supply chains, which create fragility. Fragility threatens food insecurity, which intensifies consumer demand behavior — panic buying, hoarding — that further destabilizes supply chains.',
+    nodes: ['consumer_demand','supply_chains','fragility','food_insecurity','consumer_demand'],
+    edges: [
+      ['consumer_demand','supply_chains'],
+      ['supply_chains','fragility'],
+      ['fragility','food_insecurity'],
+      ['food_insecurity','profit_motive'],
+      ['profit_motive','food_industry'],
+      ['food_industry','supply_chains'],
+    ]
+  },
+  r4: {
+    label: 'R4',
+    color: '#2a7090',
+    colorRgba: 'rgba(42,112,144,',
+    name: 'The Waste & Emissions Loop',
+    desc: 'Overproduction driven by profit motives and cosmetic rejection standards generates massive food waste. That waste contributes to GHG emissions. Emissions accelerate climate change, which threatens yields, which drives more overproduction to compensate.',
+    nodes: ['industrial_farming','food_waste','ghg','climate','food_insecurity','profit_motive','industrial_farming'],
+    edges: [
+      ['industrial_farming','food_waste'],
+      ['food_waste','ghg'],
+      ['ghg','climate'],
+      ['climate','food_insecurity'],
+      ['food_insecurity','profit_motive'],
+      ['profit_motive','industrial_farming'],
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════
+//  LAYOUT — hand-tuned positions
+// ═══════════════════════════════════════════
+const LAYOUT = {
+  cap_values:          [160,  200],
+  climate:             [1220, 240],
+  profit_motive:       [340,  160],
+  consumer_demand:     [340,  380],
+  food_industry:       [540,  250],
+  government:          [200,  450],
+  industrial_farming:  [720,  160],
+  supply_chains:       [720,  400],
+  ghg:                 [920,  120],
+  soil_deg:            [920,  300],
+  centralization:      [920,  480],
+  food_waste:          [760,  600],
+  fragility:           [1060, 420],
+  food_insecurity:     [1200, 560],
+};
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+
+const svg    = document.getElementById('diagram');
+const eLayer = document.getElementById('edges-layer');
+const gLayer = document.getElementById('loop-glow-layer');
+const nLayer = document.getElementById('nodes-layer');
+const lLayer = document.getElementById('labels-layer');
+const llayer = document.getElementById('loop-labels-layer');
+
+let svgW, svgH, scaleX, scaleY;
+const BASE_W = 1400, BASE_H = 780;
+
+function getPos(nodeId) {
+  const [bx, by] = LAYOUT[nodeId];
+  return [bx * scaleX, by * scaleY];
+}
+
+function resize() {
+  svgW = svg.clientWidth;
+  svgH = svg.clientHeight;
+  scaleX = svgW / BASE_W;
+  scaleY = svgH / BASE_H;
+  renderAll();
+}
+
+function svgEl(tag, attrs={}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v));
+  return el;
+}
+
+function edgePath(x1,y1,x2,y2) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  const nx = -dy/dist, ny = dx/dist;
+  const cx = (x1+x2)/2 + nx * dist * 0.15;
+  const cy = (y1+y2)/2 + ny * dist * 0.15;
+
+  const targetNode = NODES.find(n => {
+    const [px,py] = getPos(n.id);
+    return Math.abs(x2 - px) < 5 && Math.abs(y2 - py) < 5;
+  });
+  const r = targetNode ? targetNode.r * Math.min(scaleX, scaleY) + 4 : 20;
+  const angle = Math.atan2(y2 - cy, x2 - cx);
+  const ex = x2 - Math.cos(angle) * r;
+  const ey = y2 - Math.sin(angle) * r;
+
+  return `M ${x1} ${y1} Q ${cx} ${cy} ${ex} ${ey}`;
+}
+
+function renderAll() {
+  eLayer.innerHTML = '';
+  gLayer.innerHTML = '';
+  nLayer.innerHTML = '';
+  lLayer.innerHTML = '';
+  llayer.innerHTML = '';
+
+  // Draw edges
+  EDGES.forEach(([fromId, toId]) => {
+    const fromNode = NODES.find(n=>n.id===fromId);
+    const toNode   = NODES.find(n=>n.id===toId);
+    if(!fromNode || !toNode) return;
+    const [x1,y1] = getPos(fromId);
+    const [x2,y2] = getPos(toId);
+    const r1 = fromNode.r * Math.min(scaleX,scaleY);
+    const angle0 = Math.atan2(y2-y1, x2-x1);
+    const sx = x1 + Math.cos(angle0)*r1;
+    const sy = y1 + Math.sin(angle0)*r1;
+
+    const path = svgEl('path', {
+      d: edgePath(sx,sy,x2,y2),
+      fill: 'none',
+      stroke: 'rgba(100,140,104,0.28)',
+      'stroke-width': 1.2,
+      'marker-end': 'url(#arrow-default)',
+      class: `edge edge-${fromId} edge-${toId}`,
+      'data-from': fromId,
+      'data-to': toId
+    });
+    eLayer.appendChild(path);
+  });
+
+  // Draw nodes
+  NODES.forEach(node => {
+    const [cx, cy] = getPos(node.id);
+    const r = node.r * Math.min(scaleX, scaleY);
+
+    const glow = svgEl('circle', {
+      cx, cy, r: r + 8,
+      fill: node.glow.replace(/[\d.]+\)$/, '0.12)'),
+      class: `node-glow glow-${node.id}`
+    });
+    nLayer.appendChild(glow);
+
+    const circle = svgEl('circle', {
+      cx, cy, r,
+      fill: node.color,
+      'fill-opacity': '0.85',
+      stroke: node.color,
+      'stroke-width': '1.5',
+      'stroke-opacity': '0.6',
+      class: `node node-${node.id}`,
+      'data-id': node.id,
+      style: 'cursor:pointer; transition: r 0.2s, fill-opacity 0.2s;'
+    });
+    nLayer.appendChild(circle);
+
+    const lines = node.label.split('\n');
+    const lineH = 13 * Math.min(scaleX, scaleY);
+    const totalH = lines.length * lineH;
+    lines.forEach((line, i) => {
+      const t = svgEl('text', {
+        x: cx,
+        y: cy - totalH/2 + lineH*0.8 + i*lineH,
+        'text-anchor': 'middle',
+        'dominant-baseline': 'middle',
+        fill: '#f0f4f0',
+        'font-family': 'DM Sans, sans-serif',
+        'font-weight': '400',
+        'font-size': `${Math.max(9, 11 * Math.min(scaleX, scaleY))}px`,
+        class: `node-label label-${node.id}`,
+        style: 'pointer-events:none; user-select:none;'
+      });
+      t.textContent = line;
+      lLayer.appendChild(t);
+    });
+
+    circle.addEventListener('mouseenter', (e) => onNodeHover(node, e));
+    circle.addEventListener('mouseleave', onNodeLeave);
+    circle.addEventListener('mousemove', onMouseMove);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  HOVER
+// ═══════════════════════════════════════════
+const tooltip = document.getElementById('tooltip');
+
+function onNodeHover(node, e) {
+  document.querySelectorAll('.edge').forEach(el => {
+    const from = el.getAttribute('data-from');
+    const to   = el.getAttribute('data-to');
+    if(from === node.id || to === node.id) {
+      el.setAttribute('stroke', 'rgba(220,220,200,0.8)');
+      el.setAttribute('stroke-width', '1.8');
+      el.setAttribute('marker-end', 'url(#arrow-hover)');
+    } else {
+      el.setAttribute('stroke', 'rgba(100,140,104,0.08)');
+    }
+  });
+
+  document.getElementById('tt-title').textContent = node.label.replace('\n',' ');
+  document.getElementById('tt-type').textContent = node.typeLabel;
+  document.getElementById('tt-desc').textContent = node.desc;
+  tooltip.classList.add('visible');
+  positionTooltip(e);
+}
+
+function onNodeLeave() {
+  if(activeLoop) return;
+  document.querySelectorAll('.edge').forEach(el => {
+    el.setAttribute('stroke', 'rgba(100,140,104,0.28)');
+    el.setAttribute('stroke-width', '1.2');
+    el.setAttribute('marker-end', 'url(#arrow-default)');
+  });
+  tooltip.classList.remove('visible');
+}
+
+function onMouseMove(e) {
+  positionTooltip(e);
+}
+
+function positionTooltip(e) {
+  const canvasRect = svg.parentElement.getBoundingClientRect();
+  let x = e.clientX - canvasRect.left + 18;
+  let y = e.clientY - canvasRect.top - 10;
+  if(x + 280 > canvasRect.width)  x = e.clientX - canvasRect.left - 280;
+  if(y + 160 > canvasRect.height) y = e.clientY - canvasRect.top - 160;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+}
+
+document.addEventListener('mousemove', e => {
+  if(!tooltip.classList.contains('visible')) return;
+  const canvasRect = svg.parentElement.getBoundingClientRect();
+  let x = e.clientX - canvasRect.left + 18;
+  let y = e.clientY - canvasRect.top - 10;
+  if(x + 280 > canvasRect.width)  x = e.clientX - canvasRect.left - 280;
+  if(y + 160 > canvasRect.height) y = e.clientY - canvasRect.top - 160;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+});
+
+// ═══════════════════════════════════════════
+//  LOOP HIGHLIGHT
+// ═══════════════════════════════════════════
+let activeLoop = null;
+
+function highlightLoop(loopId) {
+  tooltip.classList.remove('visible');
+  if(activeLoop === loopId) { clearHighlight(); return; }
+  activeLoop = loopId;
+  const loop = LOOPS[loopId];
+
+  document.querySelectorAll('.loop-btn').forEach(b => b.classList.remove('active-r1','active-r2','active-r3','active-r4'));
+  document.getElementById(`btn-${loopId}`).classList.add(`active-${loopId}`);
+  document.getElementById('btn-clear').style.display = 'block';
+
+  document.querySelectorAll('.edge').forEach(el => {
+    el.setAttribute('stroke', 'rgba(100,140,104,0.06)');
+    el.setAttribute('stroke-width', '1');
+    el.setAttribute('marker-end', 'url(#arrow-default)');
+  });
+
+  document.querySelectorAll('.node').forEach(el => {
+    el.setAttribute('fill-opacity', '0.25');
+    el.setAttribute('stroke-opacity', '0.15');
+  });
+  document.querySelectorAll('.node-label').forEach(el => el.setAttribute('opacity','0.25'));
+
+  loop.edges.forEach(([fromId, toId]) => {
+    const edgeEl = document.querySelector(`.edge[data-from="${fromId}"][data-to="${toId}"]`);
+    if(edgeEl) {
+      edgeEl.setAttribute('stroke', loop.color);
+      edgeEl.setAttribute('stroke-width', '2.5');
+      edgeEl.setAttribute('stroke-opacity', '0.9');
+      edgeEl.setAttribute('marker-end', `url(#arrow-${loopId})`);
+    }
+  });
+
+  const loopNodeIds = new Set(loop.nodes);
+  loopNodeIds.forEach(nid => {
+    const nodeEl = document.querySelector(`.node[data-id="${nid}"]`);
+    const labelEls = document.querySelectorAll(`.label-${nid}`);
+    if(nodeEl) {
+      nodeEl.setAttribute('fill-opacity','1');
+      nodeEl.setAttribute('stroke-opacity','1');
+      nodeEl.setAttribute('stroke', loop.color);
+      nodeEl.setAttribute('stroke-width','2.5');
+    }
+    labelEls.forEach(el => el.setAttribute('opacity','1'));
+  });
+
+  gLayer.innerHTML = '';
+  loop.edges.forEach(([fromId,toId]) => {
+    const fromNode = NODES.find(n=>n.id===fromId);
+    const toNode   = NODES.find(n=>n.id===toId);
+    if(!fromNode||!toNode) return;
+    const [x1,y1] = getPos(fromId);
+    const [x2,y2] = getPos(toId);
+    const r1 = fromNode.r * Math.min(scaleX,scaleY);
+    const angle0 = Math.atan2(y2-y1, x2-x1);
+    const sx = x1 + Math.cos(angle0)*r1;
+    const sy = y1 + Math.sin(angle0)*r1;
+
+    const glowPath = svgEl('path', {
+      d: edgePath(sx,sy,x2,y2),
+      fill: 'none',
+      stroke: loop.color,
+      'stroke-width': '6',
+      'stroke-opacity': '0.15',
+    });
+    gLayer.appendChild(glowPath);
+  });
+
+  const labelPos = getLoopLabelPos(loop.nodes);
+  const loopLabel = svgEl('text', {
+    x: labelPos[0],
+    y: labelPos[1],
+    'text-anchor':'middle',
+    fill: loop.color,
+    'font-family': 'Syne, sans-serif',
+    'font-weight': '800',
+    'font-size': `${Math.max(11, 14*Math.min(scaleX,scaleY))}px`,
+    opacity: '0.8'
+  });
+  loopLabel.textContent = loop.label;
+  llayer.appendChild(loopLabel);
+
+  const panel = document.getElementById('info-panel');
+  const labelEl = document.getElementById('info-loop-label');
+  labelEl.textContent = `${loop.label} · Reinforcing Loop`;
+  labelEl.style.color = loop.color;
+  document.getElementById('info-loop-name').textContent = loop.name;
+  document.getElementById('info-loop-desc').textContent = loop.desc;
+
+  const pathEl = document.getElementById('info-loop-path');
+  pathEl.innerHTML = '';
+  const uniqueNodes = [...new Set(loop.nodes)];
+  uniqueNodes.forEach((nid, i) => {
+    const n = NODES.find(x=>x.id===nid);
+    if(!n) return;
+    const span = document.createElement('span');
+    span.className = 'path-node';
+    span.textContent = n.label.replace('\n',' ');
+    span.style.borderColor = loop.color;
+    span.style.color = loop.color;
+    pathEl.appendChild(span);
+    if(i < uniqueNodes.length-1) {
+      const arr = document.createElement('span');
+      arr.className = 'path-arrow';
+      arr.textContent = '→';
+      arr.style.color = loop.color;
+      pathEl.appendChild(arr);
+    }
+  });
+
+  panel.classList.remove('hidden');
+}
+
+function getLoopLabelPos(nodeIds) {
+  let sumX=0, sumY=0, count=0;
+  new Set(nodeIds).forEach(id => {
+    const [x,y] = getPos(id);
+    sumX+=x; sumY+=y; count++;
+  });
+  return [sumX/count, sumY/count - 20*Math.min(scaleX,scaleY)];
+}
+
+function clearHighlight() {
+  activeLoop = null;
+  document.querySelectorAll('.loop-btn').forEach(b => b.classList.remove('active-r1','active-r2','active-r3','active-r4'));
+  document.getElementById('btn-clear').style.display = 'none';
+  document.getElementById('info-panel').classList.add('hidden');
+  gLayer.innerHTML = '';
+  llayer.innerHTML = '';
+
+  document.querySelectorAll('.edge').forEach(el => {
+    el.setAttribute('stroke', 'rgba(100,140,104,0.28)');
+    el.setAttribute('stroke-width', '1.2');
+    el.setAttribute('stroke-opacity', '1');
+    el.setAttribute('marker-end', 'url(#arrow-default)');
+  });
+  document.querySelectorAll('.node').forEach(el => {
+    el.setAttribute('fill-opacity','0.85');
+    el.setAttribute('stroke-opacity','0.6');
+    el.setAttribute('stroke', el.getAttribute('fill'));
+    el.setAttribute('stroke-width','1.5');
+  });
+  document.querySelectorAll('.node-label').forEach(el => el.setAttribute('opacity','1'));
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+window.addEventListener('resize', resize);
+resize();
+</script>
+</body>
+</html>

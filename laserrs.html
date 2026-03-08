@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LASERRS Framework — Reference Document</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #0a120b;
+  --deep: #111a12;
+  --forest: #162418;
+  --mid: #1e3220;
+  --leaf: #2a4a2c;
+  --sage: #4a7a4e;
+  --mist: #8aaa8c;
+  --frost: #c8d8c8;
+  --snow: #f0f4f0;
+  --terracotta: #c45a30;
+  --ember: #e07040;
+  --gold: #c8960a;
+  --amber: #e0aa10;
+  --white: #f8faf8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--void);
+  color: var(--snow);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+/* ── COVER ─────────────────────────────────────── */
+.cover {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+  background: var(--void);
+}
+
+.cover-bg-letter {
+  position: absolute;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(300px, 50vw, 600px);
+  line-height: 1;
+  color: var(--forest);
+  right: -4vw;
+  top: 50%;
+  transform: translateY(-52%);
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.05em;
+}
+
+.cover-top {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: 48px;
+}
+
+.cover-label {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 24px;
+}
+
+.cover-acronym {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(72px, 14vw, 160px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--white);
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 1;
+}
+
+.cover-acronym span {
+  color: var(--ember);
+}
+
+.cover-fullname {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: clamp(16px, 3vw, 24px);
+  color: var(--mist);
+  line-height: 1.4;
+  max-width: 540px;
+  position: relative;
+  z-index: 1;
+}
+
+.cover-bottom {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  border-top: 1px solid var(--mid);
+  padding-top: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.cover-descriptor {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--mist);
+  max-width: 480px;
+}
+
+.cover-meta {
+  text-align: right;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--leaf);
+  line-height: 1.9;
+}
+
+/* ── STRUCTURE OVERVIEW ─────────────────────────── */
+.structure {
+  padding: 80px 60px;
+  background: var(--deep);
+  position: relative;
+}
+
+.section-eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-bottom: 32px;
+  display: block;
+}
+
+.structure-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(28px, 5vw, 46px);
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 48px;
+  max-width: 700px;
+}
+
+.structure-diagram {
+  display: grid;
+  grid-template-columns: 1fr 80px 1fr;
+  gap: 0;
+  margin-bottom: 60px;
+  align-items: stretch;
+}
+
+.structure-col {
+  background: var(--forest);
+  padding: 36px 32px;
+}
+
+.structure-col.outcomes {
+  background: var(--mid);
+}
+
+.structure-col-label {
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 24px;
+  display: block;
+}
+
+.structure-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.structure-arrow-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.arrow-line {
+  width: 1px;
+  flex: 1;
+  background: var(--sage);
+  opacity: 0.4;
+  min-height: 40px;
+}
+
+.arrow-head {
+  font-size: 20px;
+  color: var(--sage);
+  opacity: 0.6;
+}
+
+.value-items, .outcome-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.value-item {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.value-letter {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--ember);
+  line-height: 1;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.value-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--white);
+  line-height: 1.3;
+}
+
+.outcome-item {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.outcome-letter {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--amber);
+  line-height: 1;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.outcome-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--white);
+  line-height: 1.3;
+}
+
+.structure-logic {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--mid);
+  border: 1px solid var(--mid);
+}
+
+.logic-cell {
+  background: var(--deep);
+  padding: 24px;
+}
+
+.logic-cell-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.logic-cell-text {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--frost);
+}
+
+/* ── COMPONENT PAGES ─────────────────────────────── */
+.components {
+  padding: 0;
+}
+
+.component {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  overflow: hidden;
+}
+
+.component.value { border-top: 1px solid var(--mid); }
+.component.outcome { border-top: 2px solid var(--amber); }
+
+.component-left {
+  padding: 80px 60px;
+  background: var(--forest);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.component-bg-letter {
+  position: absolute;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 280px;
+  line-height: 1;
+  color: var(--mid);
+  bottom: -40px;
+  left: -20px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.component-tag {
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 48px;
+  position: relative;
+  z-index: 1;
+}
+
+.component-tag.outcome-tag { color: var(--amber); }
+
+.component-letter-display {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(80px, 12vw, 140px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  position: relative;
+  z-index: 1;
+}
+
+.component-letter-display.value-letter-display { color: var(--ember); }
+.component-letter-display.outcome-letter-display { color: var(--amber); }
+
+.component-word {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(24px, 4vw, 40px);
+  font-style: italic;
+  color: var(--white);
+  margin-top: 12px;
+  position: relative;
+  z-index: 1;
+  line-height: 1.2;
+}
+
+.component-left-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+.component-position-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 6px;
+}
+
+.component-position-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px;
+  color: var(--frost);
+  font-style: italic;
+}
+
+.component-right {
+  padding: 80px 60px;
+  background: var(--deep);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.component-definition {
+  border-left: 3px solid var(--ember);
+  padding-left: 20px;
+}
+
+.component-definition.outcome-def {
+  border-left-color: var(--amber);
+}
+
+.component-def-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.component-def-text {
+  font-family: 'DM Serif Display', serif;
+  font-size: 19px;
+  font-style: italic;
+  color: var(--white);
+  line-height: 1.55;
+}
+
+.component-body {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--frost);
+}
+
+.component-body p { margin-bottom: 14px; }
+.component-body p:last-child { margin-bottom: 0; }
+
+.component-connections {
+  margin-top: auto;
+  padding-top: 32px;
+  border-top: 1px solid var(--mid);
+}
+
+.connections-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 14px;
+  display: block;
+}
+
+.connections-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.connection-tag {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border: 1px solid var(--leaf);
+  color: var(--mist);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.connection-tag.active {
+  border-color: var(--ember);
+  color: var(--ember);
+}
+
+.connection-tag.outcome-active {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.component.outcome .component-left {
+  background: var(--mid);
+}
+
+/* ── APPLICATION GUIDE ──────────────────────────── */
+.application {
+  padding: 80px 60px;
+  background: var(--deep);
+  border-top: 1px solid var(--mid);
+}
+
+.application-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(28px, 5vw, 44px);
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 56px;
+  max-width: 600px;
+}
+
+.use-cases {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--mid);
+  margin-bottom: 60px;
+}
+
+.use-case {
+  background: var(--forest);
+  padding: 32px 28px;
+}
+
+.use-case-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.use-case-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--white);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.use-case-text {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--frost);
+}
+
+.evaluation-tool {
+  background: var(--forest);
+  padding: 48px;
+  margin-bottom: 40px;
+}
+
+.eval-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.eval-subtitle {
+  font-size: 13px;
+  color: var(--mist);
+  margin-bottom: 32px;
+}
+
+.eval-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--mid);
+  margin-bottom: 16px;
+}
+
+.eval-cell {
+  background: var(--deep);
+  padding: 18px;
+}
+
+.eval-cell-letter {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--ember);
+  margin-bottom: 4px;
+}
+
+.eval-cell-name {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 10px;
+}
+
+.eval-scale {
+  display: flex;
+  gap: 4px;
+}
+
+.eval-dot {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--leaf);
+  border-radius: 50%;
+}
+
+.eval-question {
+  font-size: 12px;
+  color: var(--mist);
+  line-height: 1.5;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.eval-outcomes-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--mid);
+}
+
+.eval-outcome-cell {
+  background: var(--void);
+  padding: 18px;
+}
+
+.eval-outcome-letter {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--amber);
+  margin-bottom: 4px;
+}
+
+.eval-outcome-name {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--amber);
+  opacity: 0.6;
+  margin-bottom: 10px;
+}
+
+.eval-outcome-question {
+  font-size: 12px;
+  color: var(--mist);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* ── PROVENANCE ──────────────────────────────────── */
+.provenance {
+  padding: 60px;
+  background: var(--void);
+  border-top: 1px solid var(--mid);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+
+.provenance-section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--white);
+  margin-bottom: 16px;
+}
+
+.provenance-text {
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--mist);
+}
+
+.provenance-text p { margin-bottom: 12px; }
+.provenance-text p:last-child { margin-bottom: 0; }
+
+.provenance-text strong {
+  color: var(--frost);
+  font-weight: 500;
+}
+
+.limitation-list {
+  list-style: none;
+  margin-top: 12px;
+}
+
+.limitation-list li {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--mist);
+  padding: 8px 0 8px 16px;
+  border-bottom: 1px solid var(--mid);
+  position: relative;
+}
+
+.limitation-list li::before {
+  content: '↗';
+  position: absolute;
+  left: 0;
+  color: var(--terracotta);
+  font-size: 11px;
+}
+
+.license-block {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--mid);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--leaf);
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── UTILITIES ────────────────────────────────────── */
+.divider-rule {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--leaf), transparent);
+  margin: 0 60px;
+  opacity: 0.5;
+}
+
+/* ── ANIMATIONS ──────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cover-acronym { animation: fadeIn 0.7s ease 0.1s both; }
+.cover-fullname { animation: fadeIn 0.7s ease 0.3s both; }
+.cover-descriptor { animation: fadeIn 0.7s ease 0.5s both; }
+</style>
+</head>
+<body>
+
+<!-- ── COVER ── -->
+<section class="cover">
+  <div class="cover-bg-letter">L</div>
+  <div class="cover-top">
+    <div class="cover-label">Strategic Framework · Food Systems · Version 1.0</div>
+    <div class="cover-acronym">
+      <span>L</span>ASER<span>R</span>S
+    </div>
+    <div class="cover-fullname">
+      Localism, Accessibility, Sustainability &amp; Ethics<br>
+      for Resilience, Regeneration &amp; Security
+    </div>
+  </div>
+  <div class="cover-bottom">
+    <div class="cover-descriptor">
+      A values-aligned framework for orienting food system projects, policies, investments, and innovations toward futures that are regenerative, resilient, and equitable. Developed through collaborative futures research with practitioners in AI, agri-foods, urban agriculture, biotechnology, critical infrastructure, and circular design.
+    </div>
+    <div class="cover-meta">
+      Thomas Changarathil<br>
+      OCAD University · MDes SFI<br>
+      2022 · CC BY 4.0
+    </div>
+  </div>
+</section>
+
+<!-- ── STRUCTURE ── -->
+<section class="structure">
+  <span class="section-eyebrow">How the framework is organized</span>
+  <h2 class="structure-title">Four values that drive three outcomes</h2>
+
+  <div class="structure-diagram">
+    <div class="structure-col">
+      <span class="structure-col-label">Core Values — What we orient toward</span>
+      <div class="value-items">
+        <div class="value-item">
+          <span class="value-letter">L</span>
+          <span class="value-name">Localism</span>
+        </div>
+        <div class="value-item">
+          <span class="value-letter">A</span>
+          <span class="value-name">Accessibility</span>
+        </div>
+        <div class="value-item">
+          <span class="value-letter">S</span>
+          <span class="value-name">Sustainability</span>
+        </div>
+        <div class="value-item">
+          <span class="value-letter">E</span>
+          <span class="value-name">Ethics</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="structure-arrow">
+      <div class="structure-arrow-inner">
+        <div class="arrow-line"></div>
+        <div class="arrow-head">→</div>
+        <div class="arrow-line"></div>
+      </div>
+    </div>
+
+    <div class="structure-col outcomes">
+      <span class="structure-col-label">Desired Outcomes — What we are building toward</span>
+      <div class="outcome-items">
+        <div class="outcome-item">
+          <span class="outcome-letter">R</span>
+          <span class="outcome-name">Resilience</span>
+        </div>
+        <div class="outcome-item">
+          <span class="outcome-letter">R</span>
+          <span class="outcome-name">Regeneration</span>
+        </div>
+        <div class="outcome-item">
+          <span class="outcome-letter">S</span>
+          <span class="outcome-name">Security</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="structure-logic">
+    <div class="logic-cell">
+      <span class="logic-cell-label">The problem it addresses</span>
+      <p class="logic-cell-text">Current urban food systems are driven by capitalist values — profit, growth, and efficiency — that generate waste, degrade ecosystems, centralize production, and price out lower-income communities. These outcomes are accelerated by climate change and interconnected supply chains with no redundancy.</p>
+    </div>
+    <div class="logic-cell">
+      <span class="logic-cell-label">What the framework does</span>
+      <p class="logic-cell-text">LASERRS provides a values map — not a prescription. It asks whether a given project, policy, investment, or design decision is oriented toward the values and outcomes the framework names. It was not derived from a single theory but from co-envisioned futures developed by practitioners across disciplines.</p>
+    </div>
+    <div class="logic-cell">
+      <span class="logic-cell-label">What it does not do</span>
+      <p class="logic-cell-text">LASERRS does not prescribe implementation pathways. It does not offer metrics or scoring by itself. It is a sensitizing framework — meaning it shapes what questions to ask and what to notice, rather than providing answers. Its empirical grounding requires further development through applied research.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMPONENTS ── -->
+<section class="components">
+
+  <!-- L: Localism -->
+  <div class="component value">
+    <div class="component-left">
+      <div class="component-bg-letter">L</div>
+      <div>
+        <div class="component-tag">Core Value 01 of 04</div>
+        <div class="component-letter-display value-letter-display">L</div>
+        <div class="component-word">Localism</div>
+      </div>
+      <div class="component-left-bottom">
+        <div class="component-position-label">Primary outcomes enabled</div>
+        <div class="component-position-value">Resilience · Security</div>
+      </div>
+    </div>
+    <div class="component-right">
+      <div class="component-definition">
+        <span class="component-def-label">Definition</span>
+        <div class="component-def-text">The priority given to producing, distributing, and governing food as close as possible to the communities that consume it — with economic equity flowing to local producers rather than distant multinationals.</div>
+      </div>
+      <div class="component-body">
+        <p>Localism challenges the dominant paradigm of the globalized food market, in which economies of scale reward the largest producers and extend supply chains to the point of fragility. It does not reject global trade outright, but asserts that communities should have sovereign capacity to feed themselves independent of that trade.</p>
+        <p>In practice, localism manifests as support for urban growing infrastructure — hydroponics, vertical farming, aquaponics — integrated into the built environment. It includes community ownership of food production assets, local composting loops, and zoning policy that treats food growing as essential infrastructure rather than an amenity.</p>
+        <p>A localism orientation asks: who holds equity in this food system, and does wealth generated by food production flow back into the communities that need it most?</p>
+      </div>
+      <div class="component-connections">
+        <span class="connections-label">Reinforces</span>
+        <div class="connections-list">
+          <span class="connection-tag active">Accessibility</span>
+          <span class="connection-tag">Sustainability</span>
+          <span class="connection-tag">Ethics</span>
+          <span class="connection-tag outcome-active">Resilience</span>
+          <span class="connection-tag outcome-active">Security</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A: Accessibility -->
+  <div class="component value">
+    <div class="component-left">
+      <div class="component-bg-letter">A</div>
+      <div>
+        <div class="component-tag">Core Value 02 of 04</div>
+        <div class="component-letter-display value-letter-display">A</div>
+        <div class="component-word">Accessibility</div>
+      </div>
+      <div class="component-left-bottom">
+        <div class="component-position-label">Primary outcomes enabled</div>
+        <div class="component-position-value">Security · Resilience</div>
+      </div>
+    </div>
+    <div class="component-right">
+      <div class="component-definition">
+        <span class="component-def-label">Definition</span>
+        <div class="component-def-text">The condition in which all people — regardless of income, location, or social identity — can reliably obtain nutritious, sustainably produced, and culturally appropriate food.</div>
+      </div>
+      <div class="component-body">
+        <p>Accessibility encompasses both physical and economic dimensions. A food system may produce abundant, sustainable food that remains structurally unavailable to lower-income communities due to pricing, geography, or distribution design. LASERRS treats this outcome as a system failure, not a market inefficiency to be optimized around.</p>
+        <p>The current system places a "health tax" on lower-income individuals: the cheapest food is the most processed, least nutritious, and most addictive by design. Accessibility as a core value rejects this outcome as acceptable and orients investment, policy, and design toward eliminating it.</p>
+        <p>Accessibility is also temporal — a food system that is affordable today but collapses under supply shocks is not genuinely accessible. This is why accessibility is closely linked to resilience in the framework structure.</p>
+      </div>
+      <div class="component-connections">
+        <span class="connections-label">Reinforces</span>
+        <div class="connections-list">
+          <span class="connection-tag active">Localism</span>
+          <span class="connection-tag">Ethics</span>
+          <span class="connection-tag outcome-active">Security</span>
+          <span class="connection-tag outcome-active">Resilience</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S: Sustainability -->
+  <div class="component value">
+    <div class="component-left">
+      <div class="component-bg-letter">S</div>
+      <div>
+        <div class="component-tag">Core Value 03 of 04</div>
+        <div class="component-letter-display value-letter-display">S</div>
+        <div class="component-word">Sustainability</div>
+      </div>
+      <div class="component-left-bottom">
+        <div class="component-position-label">Primary outcomes enabled</div>
+        <div class="component-position-value">Regeneration · Resilience</div>
+      </div>
+    </div>
+    <div class="component-right">
+      <div class="component-definition">
+        <span class="component-def-label">Definition</span>
+        <div class="component-def-text">The commitment to producing food through methods that do not deplete the natural systems they depend upon — and ideally, that actively restore them over time.</div>
+      </div>
+      <div class="component-body">
+        <p>Sustainability in LASERRS goes beyond emissions reduction. It encompasses soil health, water use, biodiversity, and the long-term viability of agricultural land. Industrial farming practices — monocultures, herbicide and pesticide regimes, extractive land use — are recognized as direct threats to the sustainability of food systems regardless of their short-term efficiency gains.</p>
+        <p>Sustainability also has a consumer and cultural dimension. A food system oriented toward sustainability cultivates consumer awareness of the true costs embedded in food choices — environmental, social, and economic — and removes the "green premium" that currently makes sustainable options accessible only to higher-income consumers.</p>
+        <p>The relationship between sustainability and regeneration in the framework is aspirational: sustainability sets the floor (do no harm), regeneration sets the ceiling (actively restore).</p>
+      </div>
+      <div class="component-connections">
+        <span class="connections-label">Reinforces</span>
+        <div class="connections-list">
+          <span class="connection-tag">Ethics</span>
+          <span class="connection-tag active">Localism</span>
+          <span class="connection-tag outcome-active">Regeneration</span>
+          <span class="connection-tag outcome-active">Resilience</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E: Ethics -->
+  <div class="component value">
+    <div class="component-left">
+      <div class="component-bg-letter">E</div>
+      <div>
+        <div class="component-tag">Core Value 04 of 04</div>
+        <div class="component-letter-display value-letter-display">E</div>
+        <div class="component-word">Ethics</div>
+      </div>
+      <div class="component-left-bottom">
+        <div class="component-position-label">Primary outcomes enabled</div>
+        <div class="component-position-value">Regeneration · Security</div>
+      </div>
+    </div>
+    <div class="component-right">
+      <div class="component-definition">
+        <span class="component-def-label">Definition</span>
+        <div class="component-def-text">The centering of human dignity, animal welfare, ecological rights, and Indigenous sovereignty in all food system decisions — placing these considerations above profit and growth wherever they conflict.</div>
+      </div>
+      <div class="component-body">
+        <p>Ethics is the most expansive value in the framework. It encompasses the treatment of agricultural labour — including migrant workers and smallholder farmers who bear the costs of industrial farming without sharing its rewards. It includes the welfare of animals in food production systems. And it extends to the legal and moral rights of ecosystems as entities with standing, not merely resources to be managed.</p>
+        <p>In the Canadian context, ethics requires a direct engagement with Indigenous reconciliation. Indigenous communities hold centuries of knowledge about sustainable food production, land stewardship, and ecological relationships. The ethical imperative is not to extract and apply this knowledge, but to restore the sovereignty and governance rights of Indigenous communities over food systems on their territories.</p>
+        <p>Ethics also governs technology: AI, automation, and data systems in food infrastructure must be subject to community governance and transparency requirements that prevent the re-centralization of power under new technological forms.</p>
+      </div>
+      <div class="component-connections">
+        <span class="connections-label">Reinforces</span>
+        <div class="connections-list">
+          <span class="connection-tag active">Accessibility</span>
+          <span class="connection-tag active">Sustainability</span>
+          <span class="connection-tag active">Localism</span>
+          <span class="connection-tag outcome-active">Regeneration</span>
+          <span class="connection-tag outcome-active">Security</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- R: Resilience -->
+  <div class="component outcome">
+    <div class="component-left">
+      <div class="component-bg-letter">R</div>
+      <div>
+        <div class="component-tag outcome-tag">Desired Outcome 01 of 03</div>
+        <div class="component-letter-display outcome-letter-display">R</div>
+        <div class="component-word">Resilience</div>
+      </div>
+      <div class="component-left-bottom">
+        <div class="component-position-label">Primarily driven by</div>
+        <div class="component-position-value">Localism · Accessibility · Sustainability</div>
+      </div>
+    </div>
+    <div class="component-right">
+      <div class="component-definition outcome-def">
+        <span class="component-def-label">Definition</span>
+        <div class="component-def-text">The capacity of a food system to absorb shocks — climate events, geopolitical disruptions, supply chain failures — and continue delivering adequate, accessible food to all urban residents.</div>
+      </div>
+      <div class="component-body">
+        <p>Resilience in food systems is not the same as robustness. A robust system resists disruption through scale and redundancy — the approach of the current industrial model, which has proven vulnerable precisely because its scale creates systemic interdependencies. A resilient system absorbs disruption through distributed structure and adaptive capacity.</p>
+        <p>The primary structural interventions that build food system resilience are decentralization (more, smaller, locally-governed production nodes), supply chain shortening (reducing the distance and complexity between production and consumption), and community food sovereignty (giving communities the knowledge, infrastructure, and legal standing to govern their own food supply).</p>
+        <p>Technology — including AI — can support resilience through predictive capabilities, automation of local production systems, and supply chain optimization. But technology alone cannot substitute for the structural changes in ownership and governance that genuine resilience requires.</p>
+      </div>
+      <div class="component-connections">
+        <span class="connections-label">Enabled by</span>
+        <div class="connections-list">
+          <span class="connection-tag active">Localism</span>
+          <span class="connection-tag active">Accessibility</span>
+          <span class="connection-tag active">Sustainability</span>
+          <span class="connection-tag">Ethics</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- R: Regeneration -->
+  <div class="component outcome">
+    <div class="component-left">
+      <div class="component-bg-letter">R</div>
+      <div>
+        <div class="component-tag outcome-tag">Desired Outcome 02 of 03</div>
+        <div class="component-letter-display outcome-letter-display">R</div>
+        <div class="component-word">Regeneration</div>
+      </div>
+      <div class="component-left-bottom">
+        <div class="component-position-label">Primarily driven by</div>
+        <div class="component-position-value">Sustainability · Ethics</div>
+      </div>
+    </div>
+    <div class="component-right">
+      <div class="component-definition outcome-def">
+        <span class="component-def-label">Definition</span>
+        <div class="component-def-text">The active restoration of the natural systems — soil, water, biodiversity, carbon cycles — that industrial food production has degraded, such that the land becomes more productive and ecologically rich over time, not less.</div>
+      </div>
+      <div class="component-body">
+        <p>Regeneration sets the ceiling of ambition for LASERRS. Where sustainability asks that food systems stop depleting what they depend upon, regeneration asks that they actively restore it. This is a higher bar, and one that requires a genuine shift in the foundational values driving food production decisions.</p>
+        <p>Regenerative agriculture practices — cover cropping, composting, crop rotation, reduced chemical inputs, carbon sequestration — are not new technologies. Many were practiced by Indigenous agricultural communities for centuries before industrial farming replaced them. The regeneration value in LASERRS connects directly to the ethics value through this lineage: regenerative practice is also a form of reconciliation.</p>
+        <p>AI has a legitimate role in supporting regeneration through precision agriculture tools that optimize for soil health rather than yield maximization, and through large-scale data systems that can monitor and measure ecological recovery over time.</p>
+      </div>
+      <div class="component-connections">
+        <span class="connections-label">Enabled by</span>
+        <div class="connections-list">
+          <span class="connection-tag active">Sustainability</span>
+          <span class="connection-tag active">Ethics</span>
+          <span class="connection-tag">Localism</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S: Security -->
+  <div class="component outcome">
+    <div class="component-left">
+      <div class="component-bg-letter">S</div>
+      <div>
+        <div class="component-tag outcome-tag">Desired Outcome 03 of 03</div>
+        <div class="component-letter-display outcome-letter-display">S</div>
+        <div class="component-word">Security</div>
+      </div>
+      <div class="component-left-bottom">
+        <div class="component-position-label">Primarily driven by</div>
+        <div class="component-position-value">Accessibility · Ethics · Localism</div>
+      </div>
+    </div>
+    <div class="component-right">
+      <div class="component-definition outcome-def">
+        <span class="component-def-label">Definition</span>
+        <div class="component-def-text">The condition in which every person in a city has reliable, ongoing access to sufficient, nutritious, and culturally appropriate food — not as a market outcome but as a social guarantee.</div>
+      </div>
+      <div class="component-body">
+        <p>Food security in the Canadian context is primarily an affordability and distribution challenge, not a production one. Canada is a net food exporter — the problem is not that there isn't enough food, but that the systems for getting it to people who need it are organized around profit rather than need. Food insecurity rises sharply during supply chain disruptions not because food disappears, but because prices rise beyond what lower-income households can absorb.</p>
+        <p>Security as a LASERRS outcome therefore requires structural interventions: community food governance, universal food access programs, public investment in local production infrastructure, and supply chains designed for equity of distribution rather than efficiency of throughput.</p>
+        <p>The relationship between security and resilience in the framework is directional: resilient systems make security achievable in the long run. But security requires deliberate policy and community governance commitments that resilient infrastructure alone does not guarantee.</p>
+      </div>
+      <div class="component-connections">
+        <span class="connections-label">Enabled by</span>
+        <div class="connections-list">
+          <span class="connection-tag active">Accessibility</span>
+          <span class="connection-tag active">Ethics</span>
+          <span class="connection-tag active">Localism</span>
+          <span class="connection-tag">Sustainability</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── APPLICATION ── -->
+<section class="application">
+  <span class="section-eyebrow">Applying the framework</span>
+  <h2 class="application-title">How to use LASERRS to orient decisions</h2>
+
+  <div class="use-cases">
+    <div class="use-case">
+      <span class="use-case-icon">🏛️</span>
+      <div class="use-case-title">Policy Evaluation</div>
+      <p class="use-case-text">Use LASERRS to assess whether a proposed food policy advances or undermines the four core values. Ask which values are explicitly supported, which are ignored, and whether trade-offs between values are acknowledged. A policy that maximizes Sustainability but ignores Accessibility is not a LASERRS-aligned policy — it shifts burden onto lower-income communities.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-icon">💡</span>
+      <div class="use-case-title">Project Design</div>
+      <p class="use-case-text">When designing a food system intervention — a community growing initiative, a technology deployment, a supply chain redesign — use LASERRS as a design brief. Each of the four values should be legible in the design. Where a value cannot be addressed, document the trade-off explicitly and seek compensating mechanisms.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-icon">📊</span>
+      <div class="use-case-title">Investment Orientation</div>
+      <p class="use-case-text">For investors and funders evaluating food system opportunities, LASERRS provides a values filter distinct from financial return metrics. An investment may generate strong financial returns while actively undermining Localism or Ethics. The framework makes this visible and creates a common vocabulary for impact-oriented capital deployment.</p>
+    </div>
+  </div>
+
+  <div class="evaluation-tool">
+    <div class="eval-title">Quick Evaluation Template</div>
+    <div class="eval-subtitle">Rate alignment with each component on a 1–5 scale. Document gaps and trade-offs explicitly.</div>
+    <div class="eval-grid">
+      <div class="eval-cell">
+        <div class="eval-cell-letter">L</div>
+        <div class="eval-cell-name">Localism</div>
+        <div class="eval-scale">
+          <div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div>
+        </div>
+        <div class="eval-question">Does this keep production and governance close to the communities it serves?</div>
+      </div>
+      <div class="eval-cell">
+        <div class="eval-cell-letter">A</div>
+        <div class="eval-cell-name">Accessibility</div>
+        <div class="eval-scale">
+          <div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div>
+        </div>
+        <div class="eval-question">Does this improve food access for lower-income and marginalized communities?</div>
+      </div>
+      <div class="eval-cell">
+        <div class="eval-cell-letter">S</div>
+        <div class="eval-cell-name">Sustainability</div>
+        <div class="eval-scale">
+          <div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div>
+        </div>
+        <div class="eval-question">Does this reduce ecological harm and move toward net-zero or net-positive land use?</div>
+      </div>
+      <div class="eval-cell">
+        <div class="eval-cell-letter">E</div>
+        <div class="eval-cell-name">Ethics</div>
+        <div class="eval-scale">
+          <div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div><div class="eval-dot"></div>
+        </div>
+        <div class="eval-question">Does this respect labour rights, animal welfare, Indigenous sovereignty, and ecological rights?</div>
+      </div>
+    </div>
+    <div class="eval-outcomes-row">
+      <div class="eval-outcome-cell">
+        <div class="eval-outcome-letter">R</div>
+        <div class="eval-outcome-name">Resilience</div>
+        <div class="eval-outcome-question">Does this make the food system more capable of absorbing future shocks?</div>
+      </div>
+      <div class="eval-outcome-cell">
+        <div class="eval-outcome-letter">R</div>
+        <div class="eval-outcome-name">Regeneration</div>
+        <div class="eval-outcome-question">Does this actively restore natural systems, or merely reduce harm to them?</div>
+      </div>
+      <div class="eval-outcome-cell">
+        <div class="eval-outcome-letter">S</div>
+        <div class="eval-outcome-name">Security</div>
+        <div class="eval-outcome-question">Does this ensure reliable food access for all, as a social guarantee rather than a market outcome?</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROVENANCE ── -->
+<section class="provenance">
+  <div>
+    <h3 class="provenance-section-title">Origins &amp; Context</h3>
+    <div class="provenance-text">
+      <p>LASERRS was developed through a <strong>Three Horizons workshop</strong> conducted in 2022 as part of a Major Research Project in the Master of Design in Strategic Foresight &amp; Innovation program at OCAD University, Toronto.</p>
+      <p>The workshop brought together nine participants with expertise across <strong>artificial intelligence, agri-food production, urban agriculture, biotechnology, critical infrastructure planning, circular design methods, and strategic foresight</strong>. The workshop was designed to surface a co-envisioned future for Canadian urban food systems and identify leverage points for AI-driven circular transitions.</p>
+      <p>LASERRS emerged from an affinity mapping exercise on the Horizon Three outputs — the co-envisioned future that participants described. It represents the values and outcomes that group articulated as foundational to a resilient, regenerative, and secure food future for Canada. It is a <strong>design artifact of a collective imagination</strong>, not an empirically derived theory.</p>
+      <div class="license-block">
+        LASERRS Framework © Thomas Changarathil, 2022. Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). You are free to share and adapt this material for any purpose, with attribution.
+      </div>
+    </div>
+  </div>
+  <div>
+    <h3 class="provenance-section-title">Known Limitations &amp; Open Questions</h3>
+    <div class="provenance-text">
+      <p>The following limitations are acknowledged and represent directions for future research:</p>
+      <ul class="limitation-list">
+        <li>The framework was generated from a single workshop with nine participants — its values reflect that group's perspectives, which were predominantly urban and professional. Rural, Indigenous, and lower-income community perspectives were underrepresented.</li>
+        <li>Indigenous food sovereignty was identified as foundational to LASERRS but not developed in depth. Genuine integration of Indigenous perspectives requires co-design with Indigenous communities, not expert-facilitated visioning by non-Indigenous participants.</li>
+        <li>The relationship between the four values is described qualitatively but not operationalized. Trade-offs between values — for instance, when Localism conflicts with Accessibility at scale — are not resolved by the framework and require further theoretical development.</li>
+        <li>LASERRS has not been empirically tested against real policy processes, investment decisions, or project designs. Its utility as an evaluation tool remains to be validated through applied research.</li>
+        <li>The framework does not address how the values shift required to enact LASERRS actually happens in practice — how municipal actors, communities, and businesses transition from capitalist-value-driven systems toward LASERRS-aligned ones. This is a priority for future grounded theory research.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
