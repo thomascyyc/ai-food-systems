@@ -733,7 +733,7 @@ nav {
 
 .artifacts-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1px;
   background: var(--canopy);
   margin-bottom: 1px;
@@ -1071,11 +1071,81 @@ footer {
 }
 
 /* ═══════════════════════════════════════════
+   HAMBURGER
+═══════════════════════════════════════════ */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 101;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--mist);
+  transition: all 0.3s var(--ease);
+}
+.nav-open .hamburger span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.nav-open .hamburger span:nth-child(2) { opacity: 0; }
+.nav-open .hamburger span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* ═══════════════════════════════════════════
+   MOBILE MENU
+═══════════════════════════════════════════ */
+.mobile-menu {
+  position: fixed;
+  top: var(--nav-h);
+  left: 0; right: 0;
+  background: rgba(21,33,23,0.97);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--canopy);
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.4s var(--ease), opacity 0.3s;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+.nav-open .mobile-menu {
+  transform: translateY(0);
+  opacity: 1;
+}
+.mobile-menu a {
+  padding: 0 32px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mist);
+  border-bottom: 1px solid var(--forest);
+  transition: color 0.2s, background 0.2s;
+}
+.mobile-menu a:last-child { border-bottom: none; }
+.mobile-menu a:hover, .mobile-menu a:active {
+  color: var(--white);
+  background: rgba(255,255,255,0.04);
+}
+
+/* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
+@media (pointer: coarse) {
+  .cursor, .cursor-ring { display: none; }
+  body { cursor: auto; }
+}
+
 @media (max-width: 900px) {
   nav { padding: 0 24px; }
   nav .nav-links { display: none; }
+  .hamburger { display: flex; }
   #hero { padding: 100px 24px 40px; }
   .hero-top { grid-template-columns: 1fr; }
   .hero-right { display: none; }
@@ -1087,6 +1157,11 @@ footer {
   .participants-row { grid-template-columns: repeat(4, 1fr); }
   footer { grid-template-columns: 1fr; }
   .footer-right { text-align: left; }
+}
+
+@media (max-width: 600px) {
+  .hero-bottom { grid-template-columns: 1fr 1fr; }
+  .hero-stat-value { font-size: 40px; }
 }
 </style>
 </head>
@@ -1107,7 +1182,18 @@ footer {
     <li><a href="#update">2026</a></li>
   </ul>
   <div class="nav-year">2022 → 2026</div>
+  <button class="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#problem">Problem</a>
+  <a href="#methodology">Method</a>
+  <a href="#findings">Findings</a>
+  <a href="#artifacts">Artifacts</a>
+  <a href="#update">2026</a>
+</div>
 
 <!-- ═══ HERO ═══ -->
 <section id="hero">
@@ -1392,28 +1478,13 @@ footer {
   <div class="artifacts-header">
     <span class="eyebrow reveal">Outputs of the research</span>
     <h2 class="section-title reveal">The research<br>produced artifacts,<br>not just findings.</h2>
-    <p class="section-body reveal" style="margin-top:20px; max-width:520px;">Three designed artifacts give the work its proper form — a speculative futures document, a practitioner framework, and a systems map. Each was built in 2026 as a retroactive redesign of material that deserved better than a paper.</p>
+    <p class="section-body reveal" style="margin-top:20px; max-width:520px;">Two designed artifacts give the work its proper form — a practitioner framework and an interactive systems map. Each was built in 2026 as a retroactive redesign of material that deserved better than a paper.</p>
   </div>
 
   <div class="artifacts-grid">
-    <!-- Charter -->
-    <div class="artifact-card reveal">
-      <span class="artifact-num">01 OF 03</span>
-      <div class="artifact-icon-area">
-        <div class="artifact-icon">📜</div>
-      </div>
-      <span class="artifact-type">Speculative Document · Horizon Three</span>
-      <h3 class="artifact-title">The Urban Food Sovereignty Charter, 2045</h3>
-      <p class="artifact-desc">A speculative institutional document from the future the workshop imagined — a charter ratified across five Canadian cities, formalizing the values and commitments of a food system built on LASERRS principles. An archive from a possible future, not a prediction.</p>
-      <div class="artifact-actions">
-        <a href="charter.html" target="_blank" class="artifact-btn primary">View HTML</a>
-        <a href="charter.pdf" download class="artifact-btn">Download PDF</a>
-      </div>
-    </div>
-
     <!-- LASERRS -->
-    <div class="artifact-card reveal reveal-delay-2">
-      <span class="artifact-num">02 OF 03</span>
+    <div class="artifact-card reveal">
+      <span class="artifact-num">01 OF 02</span>
       <div class="artifact-icon-area">
         <div class="artifact-icon">🧭</div>
       </div>
@@ -1427,8 +1498,8 @@ footer {
     </div>
 
     <!-- Systems Map -->
-    <div class="artifact-card reveal reveal-delay-4">
-      <span class="artifact-num">03 OF 03</span>
+    <div class="artifact-card reveal reveal-delay-2">
+      <span class="artifact-num">02 OF 02</span>
       <div class="artifact-icon-area">
         <div class="artifact-icon">🔄</div>
       </div>
@@ -1587,6 +1658,29 @@ const observer = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.08 });
 revealEls.forEach(el => observer.observe(el));
+
+/* ── Hamburger ── */
+const hamburger = document.querySelector('.hamburger');
+
+hamburger.addEventListener('click', () => {
+  document.body.classList.toggle('nav-open');
+});
+
+document.querySelectorAll('.mobile-menu a').forEach(link => {
+  link.addEventListener('click', () => {
+    document.body.classList.remove('nav-open');
+  });
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('nav') && !e.target.closest('.mobile-menu')) {
+    document.body.classList.remove('nav-open');
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.body.classList.remove('nav-open');
+});
 
 /* ── Nav active section ── */
 const sections = document.querySelectorAll('section[id]');

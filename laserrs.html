@@ -709,9 +709,156 @@ body {
 .cover-acronym { animation: fadeIn 0.7s ease 0.1s both; }
 .cover-fullname { animation: fadeIn 0.7s ease 0.3s both; }
 .cover-descriptor { animation: fadeIn 0.7s ease 0.5s both; }
+
+/* ── COMPONENT NAV (desktop sidebar) ──────────────── */
+.component-nav {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cn-btn {
+  width: 36px; height: 36px;
+  background: rgba(22,36,24,0.88);
+  border: 1px solid var(--mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--mist);
+  text-decoration: none;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+}
+.cn-btn:hover, .cn-btn.active {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: var(--white);
+}
+
+/* ── COMPONENT NAV DRAWER (mobile) ──────────────── */
+.cn-drawer-toggle, .cn-drawer { display: none; }
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 900px) {
+  .component-nav { display: none; }
+
+  .cn-drawer-toggle {
+    display: flex;
+    position: fixed;
+    top: 16px; right: 16px;
+    width: 40px; height: 40px;
+    background: rgba(22,36,24,0.92);
+    border: 1px solid var(--mid);
+    color: var(--mist);
+    font-size: 20px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 60;
+    backdrop-filter: blur(8px);
+  }
+
+  .cn-drawer {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; right: 0;
+    width: 220px;
+    height: 100%;
+    background: rgba(10,18,11,0.97);
+    border-left: 1px solid var(--mid);
+    z-index: 59;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    padding: 72px 0 24px;
+    backdrop-filter: blur(16px);
+  }
+  .cn-drawer.open { transform: translateX(0); }
+
+  .cn-drawer-btn {
+    padding: 0 24px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--mist);
+    border-bottom: 1px solid var(--mid);
+    text-decoration: none;
+    transition: color 0.2s, background 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .cn-drawer-btn:last-child { border-bottom: none; }
+  .cn-drawer-btn:hover, .cn-drawer-btn:active {
+    color: var(--snow);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .cover { padding: 40px 24px; }
+  .cover-bottom { grid-template-columns: 1fr; gap: 20px; }
+  .cover-meta { text-align: left; }
+
+  .structure { padding: 60px 24px; }
+  .structure-diagram { grid-template-columns: 1fr; }
+  .structure-arrow { transform: rotate(90deg); }
+  .structure-logic { grid-template-columns: 1fr; }
+  .structure-col { padding: 28px 24px; }
+
+  .component { grid-template-columns: 1fr; min-height: auto; }
+  .component-left { min-height: 240px; padding: 40px 24px 24px; }
+  .component-right { padding: 32px 24px; gap: 28px; }
+  .component-bg-letter { font-size: 120px; }
+
+  .application { padding: 60px 24px; }
+  .use-cases { grid-template-columns: 1fr; }
+  .evaluation-tool { padding: 32px 24px; }
+  .eval-grid { grid-template-columns: repeat(2, 1fr); }
+  .eval-outcomes-row { grid-template-columns: 1fr; }
+
+  .provenance { padding: 40px 24px; grid-template-columns: 1fr; gap: 40px; }
+  .divider-rule { margin: 0 24px; }
+}
+
+@media (max-width: 600px) {
+  .eval-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
+
+<!-- ── COMPONENT NAV (desktop fixed sidebar) ── -->
+<nav class="component-nav" id="component-nav">
+  <a href="#localism"       class="cn-btn active" title="Localism">L</a>
+  <a href="#accessibility"  class="cn-btn" title="Accessibility">A</a>
+  <a href="#sustainability" class="cn-btn" title="Sustainability">S</a>
+  <a href="#ethics"         class="cn-btn" title="Ethics">E</a>
+  <a href="#resilience"     class="cn-btn" title="Resilience">R</a>
+  <a href="#regeneration"   class="cn-btn" title="Regeneration">R</a>
+  <a href="#security"       class="cn-btn" title="Security">S</a>
+</nav>
+
+<!-- ── MOBILE DRAWER TOGGLE ── -->
+<button class="cn-drawer-toggle" id="cn-drawer-toggle" aria-label="Components">≡</button>
+
+<!-- ── MOBILE COMPONENT DRAWER ── -->
+<div class="cn-drawer" id="cn-drawer">
+  <a href="#localism"       class="cn-drawer-btn">L · Localism</a>
+  <a href="#accessibility"  class="cn-drawer-btn">A · Accessibility</a>
+  <a href="#sustainability" class="cn-drawer-btn">S · Sustainability</a>
+  <a href="#ethics"         class="cn-drawer-btn">E · Ethics</a>
+  <a href="#resilience"     class="cn-drawer-btn">R · Resilience</a>
+  <a href="#regeneration"   class="cn-drawer-btn">R · Regeneration</a>
+  <a href="#security"       class="cn-drawer-btn">S · Security</a>
+</div>
 
 <!-- ── COVER ── -->
 <section class="cover">
@@ -813,7 +960,7 @@ body {
 <section class="components">
 
   <!-- L: Localism -->
-  <div class="component value">
+  <div class="component value" id="localism">
     <div class="component-left">
       <div class="component-bg-letter">L</div>
       <div>
@@ -850,7 +997,7 @@ body {
   </div>
 
   <!-- A: Accessibility -->
-  <div class="component value">
+  <div class="component value" id="accessibility">
     <div class="component-left">
       <div class="component-bg-letter">A</div>
       <div>
@@ -886,7 +1033,7 @@ body {
   </div>
 
   <!-- S: Sustainability -->
-  <div class="component value">
+  <div class="component value" id="sustainability">
     <div class="component-left">
       <div class="component-bg-letter">S</div>
       <div>
@@ -922,7 +1069,7 @@ body {
   </div>
 
   <!-- E: Ethics -->
-  <div class="component value">
+  <div class="component value" id="ethics">
     <div class="component-left">
       <div class="component-bg-letter">E</div>
       <div>
@@ -959,7 +1106,7 @@ body {
   </div>
 
   <!-- R: Resilience -->
-  <div class="component outcome">
+  <div class="component outcome" id="resilience">
     <div class="component-left">
       <div class="component-bg-letter">R</div>
       <div>
@@ -995,7 +1142,7 @@ body {
   </div>
 
   <!-- R: Regeneration -->
-  <div class="component outcome">
+  <div class="component outcome" id="regeneration">
     <div class="component-left">
       <div class="component-bg-letter">R</div>
       <div>
@@ -1030,7 +1177,7 @@ body {
   </div>
 
   <!-- S: Security -->
-  <div class="component outcome">
+  <div class="component outcome" id="security">
     <div class="component-left">
       <div class="component-bg-letter">S</div>
       <div>
@@ -1175,5 +1322,51 @@ body {
   </div>
 </section>
 
+
+<script>
+/* ── Component nav: IntersectionObserver active state ── */
+const componentIds = ['localism','accessibility','sustainability','ethics','resilience','regeneration','security'];
+const cnBtns = document.querySelectorAll('.cn-btn');
+
+const compObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      cnBtns.forEach(btn => btn.classList.remove('active'));
+      const active = document.querySelector(`.cn-btn[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.4 });
+
+componentIds.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) compObserver.observe(el);
+});
+
+/* ── Mobile drawer ── */
+const drawerToggle = document.getElementById('cn-drawer-toggle');
+const drawer = document.getElementById('cn-drawer');
+
+drawerToggle.addEventListener('click', e => {
+  e.stopPropagation();
+  drawer.classList.toggle('open');
+});
+
+document.querySelectorAll('.cn-drawer-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    drawer.classList.remove('open');
+  });
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cn-drawer') && !e.target.closest('.cn-drawer-toggle')) {
+    drawer.classList.remove('open');
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') drawer.classList.remove('open');
+});
+</script>
 </body>
 </html>

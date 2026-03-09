@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Emergent System Map — AI & Food Systems</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <style>
 :root {
   --void:    #040904;
@@ -94,7 +95,7 @@ body {
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .loop-btn {
@@ -130,9 +131,19 @@ body {
   overflow: hidden;
 }
 
-#diagram {
+#map-svg {
   width: 100%;
   height: 100%;
+}
+
+/* ── ANIMATED EDGES ── */
+.edge.loop-active {
+  stroke-dasharray: 8 4;
+  stroke-dashoffset: 0;
+  animation: dash-flow 1s linear infinite;
+}
+@keyframes dash-flow {
+  to { stroke-dashoffset: -12; }
 }
 
 /* ── TOOLTIP ── */
@@ -147,16 +158,13 @@ body {
   transition: opacity 0.2s;
   z-index: 20;
 }
-
 .tooltip.visible { opacity: 1; }
-
 .tooltip-title {
   font-family: 'DM Serif Display', serif;
   font-size: 15px;
   color: var(--white);
   margin-bottom: 4px;
 }
-
 .tooltip-type {
   font-size: 10px;
   letter-spacing: 2px;
@@ -164,7 +172,6 @@ body {
   color: var(--mist);
   margin-bottom: 8px;
 }
-
 .tooltip-desc {
   font-size: 12px;
   line-height: 1.65;
@@ -183,7 +190,6 @@ body {
   transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
   z-index: 15;
 }
-
 .info-panel.hidden { transform: translateX(-340px); opacity: 0; }
 
 .info-panel-header {
@@ -193,13 +199,11 @@ body {
   justify-content: space-between;
   align-items: center;
 }
-
 .info-loop-label {
   font-size: 10px;
   letter-spacing: 3px;
   text-transform: uppercase;
 }
-
 .info-close {
   background: none;
   border: none;
@@ -212,10 +216,7 @@ body {
 }
 .info-close:hover { color: var(--white); }
 
-.info-panel-body {
-  padding: 20px;
-}
-
+.info-panel-body { padding: 20px; }
 .info-loop-name {
   font-family: 'DM Serif Display', serif;
   font-size: 18px;
@@ -223,21 +224,18 @@ body {
   margin-bottom: 10px;
   line-height: 1.2;
 }
-
 .info-loop-desc {
   font-size: 12.5px;
   line-height: 1.75;
   color: var(--frost);
   margin-bottom: 16px;
 }
-
 .info-loop-path {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
 }
-
 .path-node {
   font-size: 11px;
   padding: 3px 8px;
@@ -245,7 +243,6 @@ body {
   color: var(--mist);
   font-family: 'DM Sans', sans-serif;
 }
-
 .path-arrow {
   color: var(--leaf);
   font-size: 14px;
@@ -262,7 +259,6 @@ body {
   padding: 16px 20px;
   z-index: 15;
 }
-
 .legend-title {
   font-size: 10px;
   letter-spacing: 3px;
@@ -270,57 +266,19 @@ body {
   color: var(--mist);
   margin-bottom: 14px;
 }
-
-.legend-items {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.legend-dot {
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.legend-label {
-  font-size: 11px;
-  color: var(--frost);
-  letter-spacing: 0.5px;
-}
-
-.legend-divider {
-  height: 1px;
-  background: var(--canopy);
-  margin: 8px 0;
-}
-
-.legend-edge {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.legend-line {
-  width: 28px;
-  height: 1px;
-  position: relative;
-}
-
+.legend-items { display: flex; flex-direction: column; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 10px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { font-size: 11px; color: var(--frost); letter-spacing: 0.5px; }
+.legend-divider { height: 1px; background: var(--canopy); margin: 8px 0; }
+.legend-edge { display: flex; align-items: center; gap: 10px; }
+.legend-line { width: 28px; height: 1px; position: relative; }
 .legend-line::after {
   content: '▶';
   position: absolute;
-  right: -6px;
-  top: -6px;
+  right: -6px; top: -6px;
   font-size: 10px;
 }
-
 .legend-line.reinforce { background: rgba(180,180,160,0.5); color: rgba(180,180,160,0.5); }
 .legend-line.reinforce::after { color: rgba(180,180,160,0.5); }
 
@@ -335,20 +293,66 @@ body {
   color: var(--mist);
   text-transform: uppercase;
   pointer-events: none;
+  white-space: nowrap;
   animation: fade-out 1s ease 4s forwards;
 }
-
 @keyframes fade-out {
   from { opacity: 1; }
   to   { opacity: 0; }
 }
+.default-hint { display: inline; }
+.touch-hint   { display: none; }
+@media (pointer: coarse) {
+  .default-hint { display: none; }
+  .touch-hint   { display: inline; }
+}
 
-/* Node labels */
-.node-label {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 400;
-  pointer-events: none;
-  user-select: none;
+/* ── NODE PANEL (mobile bottom) ── */
+.node-panel {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(8,14,8,0.96);
+  border-top: 1px solid var(--canopy);
+  backdrop-filter: blur(12px);
+  padding: 16px 56px 20px 20px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+  z-index: 30;
+  max-height: 180px;
+}
+.node-panel.visible { transform: translateY(0); }
+.node-panel-close {
+  position: absolute;
+  top: 12px; right: 16px;
+  background: none; border: none;
+  color: var(--mist); font-size: 22px;
+  cursor: pointer; line-height: 1; padding: 4px;
+}
+.node-panel-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px; color: var(--white);
+  margin-bottom: 4px;
+}
+.node-panel-type {
+  font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--mist);
+  margin-bottom: 8px;
+}
+.node-panel-desc {
+  font-size: 12.5px; line-height: 1.65;
+  color: var(--frost);
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* ── MOBILE TOPBAR ── */
+@media (max-width: 700px) {
+  .topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 6px; }
+  .topbar-subtitle { display: none; }
+  .topbar-right { gap: 5px; overflow-x: auto; }
+  .loop-btn { font-size: 9px; padding: 4px 8px; white-space: nowrap; }
+  .legend { display: none; }
+  .info-panel { left: 12px; bottom: 8px; width: calc(100vw - 24px); }
 }
 </style>
 </head>
@@ -383,67 +387,18 @@ body {
       <span class="btn-dot" style="background:var(--sky)"></span>R4 — Waste Loop
     </button>
     <button class="loop-btn" id="btn-clear" onclick="clearHighlight()" style="display:none">Clear</button>
+    <button class="loop-btn" id="btn-reset" onclick="resetZoom()" style="display:none">⟳ Reset</button>
   </div>
 </div>
 
 <!-- CANVAS -->
 <div class="canvas-wrap">
-  <p class="instructions">Hover nodes to explore · Click loop buttons to trace feedback cycles</p>
+  <p class="instructions">
+    <span class="default-hint">Hover nodes to explore · Scroll to zoom · Click loops to trace</span>
+    <span class="touch-hint">Tap nodes to explore · Pinch to zoom</span>
+  </p>
 
-  <svg id="diagram">
-    <defs>
-      <!-- Arrow markers -->
-      <marker id="arrow-default" markerWidth="8" markerHeight="8"
-              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
-        <path d="M0,0 L0,6 L8,3 z" fill="rgba(120,150,122,0.45)"/>
-      </marker>
-      <marker id="arrow-r1" markerWidth="8" markerHeight="8"
-              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
-        <path d="M0,0 L0,6 L8,3 z" fill="rgba(208,88,40,0.9)"/>
-      </marker>
-      <marker id="arrow-r2" markerWidth="8" markerHeight="8"
-              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
-        <path d="M0,0 L0,6 L8,3 z" fill="rgba(216,160,24,0.9)"/>
-      </marker>
-      <marker id="arrow-r3" markerWidth="8" markerHeight="8"
-              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
-        <path d="M0,0 L0,6 L8,3 z" fill="rgba(74,122,78,0.9)"/>
-      </marker>
-      <marker id="arrow-r4" markerWidth="8" markerHeight="8"
-              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
-        <path d="M0,0 L0,6 L8,3 z" fill="rgba(42,112,144,0.9)"/>
-      </marker>
-      <marker id="arrow-hover" markerWidth="8" markerHeight="8"
-              refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
-        <path d="M0,0 L0,6 L8,3 z" fill="rgba(240,240,220,0.9)"/>
-      </marker>
-
-      <!-- Glow filters -->
-      <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="4" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <filter id="glow-amber" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="4" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <filter id="glow-node" x="-60%" y="-60%" width="220%" height="220%">
-        <feGaussianBlur stdDeviation="6" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-    </defs>
-
-    <!-- Edges layer -->
-    <g id="edges-layer"></g>
-    <!-- Loop glow layer -->
-    <g id="loop-glow-layer"></g>
-    <!-- Nodes layer -->
-    <g id="nodes-layer"></g>
-    <!-- Labels layer -->
-    <g id="labels-layer"></g>
-    <!-- Loop labels layer -->
-    <g id="loop-labels-layer"></g>
-  </svg>
+  <svg id="map-svg"></svg>
 
   <!-- Info panel -->
   <div class="info-panel hidden" id="info-panel">
@@ -496,6 +451,14 @@ body {
     <div class="tooltip-type" id="tt-type"></div>
     <div class="tooltip-desc" id="tt-desc"></div>
   </div>
+
+  <!-- Node panel (mobile) -->
+  <div class="node-panel" id="node-panel">
+    <button class="node-panel-close" id="node-panel-close">×</button>
+    <div class="node-panel-name" id="node-panel-name"></div>
+    <div class="node-panel-type" id="node-panel-type"></div>
+    <div class="node-panel-desc" id="node-panel-desc"></div>
+  </div>
 </div>
 
 <script>
@@ -504,7 +467,6 @@ body {
 // ═══════════════════════════════════════════
 
 const NODES = [
-  // --- Drivers ---
   {
     id: 'cap_values',
     label: 'Capitalist\nValues',
@@ -525,8 +487,6 @@ const NODES = [
     desc: 'Both a product of food systems and a threat to them. Increasing temperatures, extreme weather, and sea-level rise destabilize the conditions under which food can be produced.',
     typeLabel: 'Compounding Driver'
   },
-
-  // --- Intermediaries ---
   {
     id: 'profit_motive',
     label: 'Profit\nMotive',
@@ -547,8 +507,6 @@ const NODES = [
     desc: 'Consumer preference for low prices, year-round variety, cosmetic perfection, and convenience. Reinforces industrial farming practices and long supply chains.',
     typeLabel: 'Intermediary Process'
   },
-
-  // --- Actors ---
   {
     id: 'food_industry',
     label: 'Food\nIndustry',
@@ -569,8 +527,6 @@ const NODES = [
     desc: 'Balances tax revenue from the food industry, consumer food safety, and environmental protection. Currently disproportionately influenced by food industry lobbying.',
     typeLabel: 'System Actor'
   },
-
-  // --- Processes ---
   {
     id: 'industrial_farming',
     label: 'Industrial\nFarming',
@@ -591,8 +547,6 @@ const NODES = [
     desc: 'Long, complex international supply chains enable year-round variety and low prices but create systemic fragility. Optimized for efficiency with no redundancy.',
     typeLabel: 'System Process'
   },
-
-  // --- Outcomes ---
   {
     id: 'ghg',
     label: 'GHG\nEmissions',
@@ -655,7 +609,6 @@ const NODES = [
   },
 ];
 
-// Edges: [from, to, label]
 const EDGES = [
   ['cap_values',      'profit_motive',    '+'],
   ['cap_values',      'consumer_demand',  '+'],
@@ -683,14 +636,12 @@ const EDGES = [
   ['cap_values',      'government',       '+'],
 ];
 
-// Reinforcing feedback loops
 const LOOPS = {
   r1: {
     label: 'R1',
     color: '#d05828',
-    colorRgba: 'rgba(208,88,40,',
     name: 'The Production Loop',
-    desc: 'Profit motive drives industrial farming, which drives GHG emissions, which accelerates climate change, which threatens food security, which intensifies pressure on the profit motive to produce more. A self-reinforcing cycle with no natural correction mechanism.',
+    desc: 'Profit motive drives industrial farming, which drives GHG emissions, which accelerates climate change, which threatens food security, which intensifies pressure on the profit motive to produce more.',
     nodes: ['profit_motive','industrial_farming','ghg','climate','food_insecurity','profit_motive'],
     edges: [
       ['profit_motive','industrial_farming'],
@@ -703,9 +654,8 @@ const LOOPS = {
   r2: {
     label: 'R2',
     color: '#d8a018',
-    colorRgba: 'rgba(216,160,24,',
     name: 'The Degradation Loop',
-    desc: 'Industrial farming practices degrade soil quality, reducing arable land and agricultural yields over time. This threatens food security, which intensifies profit motives to extract more from remaining land — accelerating degradation.',
+    desc: 'Industrial farming practices degrade soil quality, reducing arable land and agricultural yields. This threatens food security, which intensifies profit motives to extract more from remaining land — accelerating degradation.',
     nodes: ['industrial_farming','soil_deg','food_insecurity','profit_motive','industrial_farming'],
     edges: [
       ['industrial_farming','soil_deg'],
@@ -717,7 +667,6 @@ const LOOPS = {
   r3: {
     label: 'R3',
     color: '#4a7a4e',
-    colorRgba: 'rgba(74,122,78,',
     name: 'The Supply Chain Loop',
     desc: 'Consumer demands for year-round variety and low prices drive global supply chains, which create fragility. Fragility threatens food insecurity, which intensifies consumer demand behavior — panic buying, hoarding — that further destabilizes supply chains.',
     nodes: ['consumer_demand','supply_chains','fragility','food_insecurity','consumer_demand'],
@@ -733,9 +682,8 @@ const LOOPS = {
   r4: {
     label: 'R4',
     color: '#2a7090',
-    colorRgba: 'rgba(42,112,144,',
     name: 'The Waste & Emissions Loop',
-    desc: 'Overproduction driven by profit motives and cosmetic rejection standards generates massive food waste. That waste contributes to GHG emissions. Emissions accelerate climate change, which threatens yields, which drives more overproduction to compensate.',
+    desc: 'Overproduction driven by profit motives and cosmetic rejection standards generates massive food waste. That waste contributes to GHG emissions. Emissions accelerate climate change, which threatens yields, driving more overproduction.',
     nodes: ['industrial_farming','food_waste','ghg','climate','food_insecurity','profit_motive','industrial_farming'],
     edges: [
       ['industrial_farming','food_waste'],
@@ -748,9 +696,6 @@ const LOOPS = {
   }
 };
 
-// ═══════════════════════════════════════════
-//  LAYOUT — hand-tuned positions
-// ═══════════════════════════════════════════
 const LAYOUT = {
   cap_values:          [160,  200],
   climate:             [1220, 240],
@@ -769,290 +714,319 @@ const LAYOUT = {
 };
 
 // ═══════════════════════════════════════════
-//  RENDER
+//  D3 SETUP
 // ═══════════════════════════════════════════
 
-const svg    = document.getElementById('diagram');
-const eLayer = document.getElementById('edges-layer');
-const gLayer = document.getElementById('loop-glow-layer');
-const nLayer = document.getElementById('nodes-layer');
-const lLayer = document.getElementById('labels-layer');
-const llayer = document.getElementById('loop-labels-layer');
-
-let svgW, svgH, scaleX, scaleY;
 const BASE_W = 1400, BASE_H = 780;
 
-function getPos(nodeId) {
-  const [bx, by] = LAYOUT[nodeId];
-  return [bx * scaleX, by * scaleY];
+// Convert edges to objects
+const edgeObjects = EDGES.map(([from, to, label]) => ({ from, to, label }));
+
+// Node lookup map
+const nodeMap = {};
+NODES.forEach(n => nodeMap[n.id] = n);
+
+// Node data with layout positions
+const nodeData = NODES.map(n => ({
+  ...n,
+  x: LAYOUT[n.id][0],
+  y: LAYOUT[n.id][1],
+}));
+
+// SVG with viewBox (no manual resize needed)
+const svg = d3.select('#map-svg')
+  .attr('viewBox', `0 0 ${BASE_W} ${BASE_H}`)
+  .attr('preserveAspectRatio', 'xMidYMid meet');
+
+// Defs: markers + filter
+const defs = svg.append('defs');
+
+function addMarker(id, fillColor) {
+  const m = defs.append('marker')
+    .attr('id', id)
+    .attr('markerWidth', 8).attr('markerHeight', 8)
+    .attr('refX', 6).attr('refY', 3)
+    .attr('orient', 'auto').attr('markerUnits', 'strokeWidth');
+  m.append('path').attr('d', 'M0,0 L0,6 L8,3 z').attr('fill', fillColor);
 }
 
-function resize() {
-  svgW = svg.clientWidth;
-  svgH = svg.clientHeight;
-  scaleX = svgW / BASE_W;
-  scaleY = svgH / BASE_H;
-  renderAll();
-}
+addMarker('arrow-default', 'rgba(120,150,122,0.45)');
+addMarker('arrow-r1',      'rgba(208,88,40,0.9)');
+addMarker('arrow-r2',      'rgba(216,160,24,0.9)');
+addMarker('arrow-r3',      'rgba(74,122,78,0.9)');
+addMarker('arrow-r4',      'rgba(42,112,144,0.9)');
+addMarker('arrow-hover',   'rgba(240,240,220,0.9)');
 
-function svgEl(tag, attrs={}) {
-  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-  Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v));
-  return el;
-}
+const glowF = defs.append('filter').attr('id','glow-node')
+  .attr('x','-60%').attr('y','-60%').attr('width','220%').attr('height','220%');
+glowF.append('feGaussianBlur').attr('stdDeviation',6).attr('result','blur');
+const gfm = glowF.append('feMerge');
+gfm.append('feMergeNode').attr('in','blur');
+gfm.append('feMergeNode').attr('in','SourceGraphic');
 
-function edgePath(x1,y1,x2,y2) {
+// Map group — zoom target
+const g = svg.append('g').attr('class','map-g');
+
+// Sub-layers (order matters for z-depth)
+const edgesLayer     = g.append('g').attr('class','edges-layer');
+const loopGlowLayer  = g.append('g').attr('class','loop-glow-layer');
+const nodesLayer     = g.append('g').attr('class','nodes-layer');
+const loopLabelLayer = g.append('g').attr('class','loop-label-layer');
+
+// ── Bezier path function (static viewBox coordinates) ──
+function bezierPath(d) {
+  const fn = nodeMap[d.from], tn = nodeMap[d.to];
+  if (!fn || !tn) return '';
+  const x1 = LAYOUT[d.from][0], y1 = LAYOUT[d.from][1];
+  const x2 = LAYOUT[d.to][0],   y2 = LAYOUT[d.to][1];
   const dx = x2 - x1, dy = y2 - y1;
   const dist = Math.sqrt(dx*dx + dy*dy);
+  if (dist === 0) return '';
   const nx = -dy/dist, ny = dx/dist;
-  const cx = (x1+x2)/2 + nx * dist * 0.15;
-  const cy = (y1+y2)/2 + ny * dist * 0.15;
-
-  const targetNode = NODES.find(n => {
-    const [px,py] = getPos(n.id);
-    return Math.abs(x2 - px) < 5 && Math.abs(y2 - py) < 5;
-  });
-  const r = targetNode ? targetNode.r * Math.min(scaleX, scaleY) + 4 : 20;
+  const cx = (x1+x2)/2 + nx*dist*0.15;
+  const cy = (y1+y2)/2 + ny*dist*0.15;
+  // Start: offset from source circle edge
+  const angle0 = Math.atan2(dy, dx);
+  const sx = x1 + Math.cos(angle0)*fn.r;
+  const sy = y1 + Math.sin(angle0)*fn.r;
+  // End: offset from target circle edge + arrowhead clearance
   const angle = Math.atan2(y2 - cy, x2 - cx);
-  const ex = x2 - Math.cos(angle) * r;
-  const ey = y2 - Math.sin(angle) * r;
-
-  return `M ${x1} ${y1} Q ${cx} ${cy} ${ex} ${ey}`;
+  const ex = x2 - Math.cos(angle)*(tn.r + 4);
+  const ey = y2 - Math.sin(angle)*(tn.r + 4);
+  return `M ${sx} ${sy} Q ${cx} ${cy} ${ex} ${ey}`;
 }
 
-function renderAll() {
-  eLayer.innerHTML = '';
-  gLayer.innerHTML = '';
-  nLayer.innerHTML = '';
-  lLayer.innerHTML = '';
-  llayer.innerHTML = '';
+// ── Draw edges ──
+edgesLayer.selectAll('.edge')
+  .data(edgeObjects).enter().append('path')
+  .attr('class', 'edge')
+  .attr('d', bezierPath)
+  .attr('fill', 'none')
+  .attr('stroke', 'rgba(100,140,104,0.28)')
+  .attr('stroke-width', 1.2)
+  .attr('marker-end', 'url(#arrow-default)');
 
-  // Draw edges
-  EDGES.forEach(([fromId, toId]) => {
-    const fromNode = NODES.find(n=>n.id===fromId);
-    const toNode   = NODES.find(n=>n.id===toId);
-    if(!fromNode || !toNode) return;
-    const [x1,y1] = getPos(fromId);
-    const [x2,y2] = getPos(toId);
-    const r1 = fromNode.r * Math.min(scaleX,scaleY);
-    const angle0 = Math.atan2(y2-y1, x2-x1);
-    const sx = x1 + Math.cos(angle0)*r1;
-    const sy = y1 + Math.sin(angle0)*r1;
+// ── Draw node groups at static LAYOUT positions ──
+const nodeGroups = nodesLayer.selectAll('.node-group')
+  .data(nodeData).enter().append('g')
+  .attr('class', d => `node-group node-${d.id}`)
+  .attr('transform', d => `translate(${d.x},${d.y})`);
 
-    const path = svgEl('path', {
-      d: edgePath(sx,sy,x2,y2),
-      fill: 'none',
-      stroke: 'rgba(100,140,104,0.28)',
-      'stroke-width': 1.2,
-      'marker-end': 'url(#arrow-default)',
-      class: `edge edge-${fromId} edge-${toId}`,
-      'data-from': fromId,
-      'data-to': toId
-    });
-    eLayer.appendChild(path);
+// Glow halo (behind main circle)
+nodeGroups.append('circle')
+  .attr('class', 'node-glow')
+  .attr('r', d => d.r + 8)
+  .attr('fill', d => d.glow.replace(/[\d.]+\)$/, '0.12)'));
+
+// Main circle — node-main class required for pulse selector
+nodeGroups.append('circle')
+  .attr('class', 'node-main')
+  .attr('r', d => d.r)
+  .attr('fill', d => d.color)
+  .attr('fill-opacity', 0.85)
+  .attr('stroke', d => d.color)
+  .attr('data-color', d => d.color)   // store for clearHighlight reset
+  .attr('stroke-width', 1.5)
+  .attr('stroke-opacity', 0.6)
+  .style('cursor', 'pointer');
+
+// Labels (appended to node groups, coordinates relative to group center)
+nodeGroups.each(function(d) {
+  const lines   = d.label.split('\n');
+  const lineH   = 13;
+  const totalH  = lines.length * lineH;
+  lines.forEach((line, i) => {
+    d3.select(this).append('text')
+      .attr('class', 'node-label')
+      .attr('x', 0)
+      .attr('y', -totalH/2 + lineH*0.8 + i*lineH)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', '#f0f4f0')
+      .attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-size', '11px')
+      .style('pointer-events', 'none')
+      .style('user-select', 'none')
+      .text(line);
   });
-
-  // Draw nodes
-  NODES.forEach(node => {
-    const [cx, cy] = getPos(node.id);
-    const r = node.r * Math.min(scaleX, scaleY);
-
-    const glow = svgEl('circle', {
-      cx, cy, r: r + 8,
-      fill: node.glow.replace(/[\d.]+\)$/, '0.12)'),
-      class: `node-glow glow-${node.id}`
-    });
-    nLayer.appendChild(glow);
-
-    const circle = svgEl('circle', {
-      cx, cy, r,
-      fill: node.color,
-      'fill-opacity': '0.85',
-      stroke: node.color,
-      'stroke-width': '1.5',
-      'stroke-opacity': '0.6',
-      class: `node node-${node.id}`,
-      'data-id': node.id,
-      style: 'cursor:pointer; transition: r 0.2s, fill-opacity 0.2s;'
-    });
-    nLayer.appendChild(circle);
-
-    const lines = node.label.split('\n');
-    const lineH = 13 * Math.min(scaleX, scaleY);
-    const totalH = lines.length * lineH;
-    lines.forEach((line, i) => {
-      const t = svgEl('text', {
-        x: cx,
-        y: cy - totalH/2 + lineH*0.8 + i*lineH,
-        'text-anchor': 'middle',
-        'dominant-baseline': 'middle',
-        fill: '#f0f4f0',
-        'font-family': 'DM Sans, sans-serif',
-        'font-weight': '400',
-        'font-size': `${Math.max(9, 11 * Math.min(scaleX, scaleY))}px`,
-        class: `node-label label-${node.id}`,
-        style: 'pointer-events:none; user-select:none;'
-      });
-      t.textContent = line;
-      lLayer.appendChild(t);
-    });
-
-    circle.addEventListener('mouseenter', (e) => onNodeHover(node, e));
-    circle.addEventListener('mouseleave', onNodeLeave);
-    circle.addEventListener('mousemove', onMouseMove);
-  });
-}
-
-// ═══════════════════════════════════════════
-//  HOVER
-// ═══════════════════════════════════════════
-const tooltip = document.getElementById('tooltip');
-
-function onNodeHover(node, e) {
-  document.querySelectorAll('.edge').forEach(el => {
-    const from = el.getAttribute('data-from');
-    const to   = el.getAttribute('data-to');
-    if(from === node.id || to === node.id) {
-      el.setAttribute('stroke', 'rgba(220,220,200,0.8)');
-      el.setAttribute('stroke-width', '1.8');
-      el.setAttribute('marker-end', 'url(#arrow-hover)');
-    } else {
-      el.setAttribute('stroke', 'rgba(100,140,104,0.08)');
-    }
-  });
-
-  document.getElementById('tt-title').textContent = node.label.replace('\n',' ');
-  document.getElementById('tt-type').textContent = node.typeLabel;
-  document.getElementById('tt-desc').textContent = node.desc;
-  tooltip.classList.add('visible');
-  positionTooltip(e);
-}
-
-function onNodeLeave() {
-  if(activeLoop) return;
-  document.querySelectorAll('.edge').forEach(el => {
-    el.setAttribute('stroke', 'rgba(100,140,104,0.28)');
-    el.setAttribute('stroke-width', '1.2');
-    el.setAttribute('marker-end', 'url(#arrow-default)');
-  });
-  tooltip.classList.remove('visible');
-}
-
-function onMouseMove(e) {
-  positionTooltip(e);
-}
-
-function positionTooltip(e) {
-  const canvasRect = svg.parentElement.getBoundingClientRect();
-  let x = e.clientX - canvasRect.left + 18;
-  let y = e.clientY - canvasRect.top - 10;
-  if(x + 280 > canvasRect.width)  x = e.clientX - canvasRect.left - 280;
-  if(y + 160 > canvasRect.height) y = e.clientY - canvasRect.top - 160;
-  tooltip.style.left = x + 'px';
-  tooltip.style.top  = y + 'px';
-}
-
-document.addEventListener('mousemove', e => {
-  if(!tooltip.classList.contains('visible')) return;
-  const canvasRect = svg.parentElement.getBoundingClientRect();
-  let x = e.clientX - canvasRect.left + 18;
-  let y = e.clientY - canvasRect.top - 10;
-  if(x + 280 > canvasRect.width)  x = e.clientX - canvasRect.left - 280;
-  if(y + 160 > canvasRect.height) y = e.clientY - canvasRect.top - 160;
-  tooltip.style.left = x + 'px';
-  tooltip.style.top  = y + 'px';
 });
 
-// ═══════════════════════════════════════════
-//  LOOP HIGHLIGHT
-// ═══════════════════════════════════════════
+// ── Zoom + Pan (d3.zoom handles mouse wheel, trackpad pinch, touch pinch) ──
+const zoom = d3.zoom()
+  .scaleExtent([0.25, 4])
+  .on('zoom', e => {
+    g.attr('transform', e.transform);
+    document.getElementById('btn-reset').style.display = 'inline-block';
+  });
+
+svg.call(zoom);
+
+function resetZoom() {
+  svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+  document.getElementById('btn-reset').style.display = 'none';
+}
+
+// ── Tooltip ──
+const tooltipEl = document.getElementById('tooltip');
+
+function positionTooltip(event) {
+  const rect = document.querySelector('.canvas-wrap').getBoundingClientRect();
+  let x = event.clientX - rect.left + 18;
+  let y = event.clientY - rect.top  - 10;
+  if (x + 280 > rect.width)  x = event.clientX - rect.left - 288;
+  if (y + 160 > rect.height) y = event.clientY - rect.top  - 165;
+  tooltipEl.style.left = x + 'px';
+  tooltipEl.style.top  = y + 'px';
+}
+
+// ── Node interactions ──
 let activeLoop = null;
+const isTouch = window.matchMedia('(pointer: coarse)').matches;
+
+nodeGroups
+  .on('mouseenter', function(event, d) {
+    if (isTouch) return;
+    // Highlight edges connected to hovered node
+    edgesLayer.selectAll('.edge').each(function(e) {
+      if (e.from === d.id || e.to === d.id) {
+        d3.select(this)
+          .attr('stroke', 'rgba(220,220,200,0.8)')
+          .attr('stroke-width', 1.8)
+          .attr('marker-end', 'url(#arrow-hover)');
+      } else if (!activeLoop) {
+        d3.select(this).attr('stroke', 'rgba(100,140,104,0.08)');
+      }
+    });
+    // Show floating tooltip
+    document.getElementById('tt-title').textContent = d.label.replace('\n', ' ');
+    document.getElementById('tt-type').textContent  = d.typeLabel;
+    document.getElementById('tt-desc').textContent  = d.desc;
+    tooltipEl.classList.add('visible');
+    positionTooltip(event);
+  })
+  .on('mouseleave', function() {
+    if (isTouch) return;
+    if (!activeLoop) {
+      edgesLayer.selectAll('.edge')
+        .attr('stroke', 'rgba(100,140,104,0.28)')
+        .attr('stroke-width', 1.2)
+        .attr('marker-end', 'url(#arrow-default)');
+    }
+    tooltipEl.classList.remove('visible');
+  })
+  .on('mousemove', function(event) {
+    if (isTouch) return;
+    positionTooltip(event);
+  })
+  .on('click', function(event, d) {
+    event.stopPropagation();
+    showNodePanel(d);
+  });
+
+// Click outside nodes closes tooltip + panel
+svg.on('click', function() {
+  tooltipEl.classList.remove('visible');
+  hideNodePanel();
+});
+
+// ── Node panel (bottom fixed, useful on mobile) ──
+function showNodePanel(d) {
+  document.getElementById('node-panel-name').textContent = d.label.replace('\n', ' ');
+  document.getElementById('node-panel-type').textContent = d.typeLabel;
+  document.getElementById('node-panel-desc').textContent = d.desc;
+  document.getElementById('node-panel').classList.add('visible');
+}
+
+function hideNodePanel() {
+  document.getElementById('node-panel').classList.remove('visible');
+}
+
+document.getElementById('node-panel-close').addEventListener('click', e => {
+  e.stopPropagation();
+  hideNodePanel();
+});
+
+// ── Loop highlight ──
+function edgeKey(d) { return `${d.from}--${d.to}`; }
 
 function highlightLoop(loopId) {
-  tooltip.classList.remove('visible');
-  if(activeLoop === loopId) { clearHighlight(); return; }
+  tooltipEl.classList.remove('visible');
+  if (activeLoop === loopId) { clearHighlight(); return; }
   activeLoop = loopId;
   const loop = LOOPS[loopId];
 
-  document.querySelectorAll('.loop-btn').forEach(b => b.classList.remove('active-r1','active-r2','active-r3','active-r4'));
+  const loopEdgeKeys = new Set(loop.edges.map(([f, t]) => `${f}--${t}`));
+  const loopNodeSet  = new Set(loop.nodes);
+
+  // Update button states
+  document.querySelectorAll('.loop-btn').forEach(b =>
+    b.classList.remove('active-r1','active-r2','active-r3','active-r4')
+  );
   document.getElementById(`btn-${loopId}`).classList.add(`active-${loopId}`);
-  document.getElementById('btn-clear').style.display = 'block';
+  document.getElementById('btn-clear').style.display = 'inline-block';
 
-  document.querySelectorAll('.edge').forEach(el => {
-    el.setAttribute('stroke', 'rgba(100,140,104,0.06)');
-    el.setAttribute('stroke-width', '1');
-    el.setAttribute('marker-end', 'url(#arrow-default)');
+  // Dim all edges (remove animation class first)
+  edgesLayer.selectAll('.edge')
+    .classed('loop-active', false)
+    .attr('stroke', 'rgba(100,140,104,0.06)')
+    .attr('stroke-width', 1)
+    .attr('stroke-opacity', 1)
+    .attr('marker-end', 'url(#arrow-default)');
+
+  // Activate loop edges (CSS class triggers dash-flow animation)
+  edgesLayer.selectAll('.edge')
+    .filter(d => loopEdgeKeys.has(edgeKey(d)))
+    .classed('loop-active', true)
+    .attr('stroke', loop.color)
+    .attr('stroke-width', 2.5)
+    .attr('stroke-opacity', 0.9)
+    .attr('marker-end', `url(#arrow-${loopId})`);
+
+  // Dim all nodes and labels
+  nodeGroups.select('.node-main')
+    .attr('fill-opacity', 0.25)
+    .attr('stroke-opacity', 0.15);
+  nodeGroups.selectAll('.node-label').attr('opacity', 0.25);
+
+  // Highlight loop nodes
+  nodeGroups.filter(d => loopNodeSet.has(d.id))
+    .select('.node-main')
+    .attr('fill-opacity', 1)
+    .attr('stroke-opacity', 1)
+    .attr('stroke', loop.color)
+    .attr('stroke-width', 2.5);
+  nodeGroups.filter(d => loopNodeSet.has(d.id))
+    .selectAll('.node-label').attr('opacity', 1);
+
+  // Glow underneath active edges
+  loopGlowLayer.selectAll('*').remove();
+  loop.edges.forEach(([from, to]) => {
+    loopGlowLayer.append('path')
+      .datum({ from, to })
+      .attr('d', bezierPath)
+      .attr('fill', 'none')
+      .attr('stroke', loop.color)
+      .attr('stroke-width', 6)
+      .attr('stroke-opacity', 0.15);
   });
 
-  document.querySelectorAll('.node').forEach(el => {
-    el.setAttribute('fill-opacity', '0.25');
-    el.setAttribute('stroke-opacity', '0.15');
-  });
-  document.querySelectorAll('.node-label').forEach(el => el.setAttribute('opacity','0.25'));
+  // Loop centroid label
+  loopLabelLayer.selectAll('*').remove();
+  const [lx, ly] = loopLabelPos(loopId);
+  loopLabelLayer.append('text')
+    .attr('x', lx).attr('y', ly)
+    .attr('text-anchor', 'middle')
+    .attr('fill', loop.color)
+    .attr('font-family', 'Syne, sans-serif')
+    .attr('font-weight', 800)
+    .attr('font-size', 14)
+    .attr('opacity', 0.8)
+    .text(loop.label);
 
-  loop.edges.forEach(([fromId, toId]) => {
-    const edgeEl = document.querySelector(`.edge[data-from="${fromId}"][data-to="${toId}"]`);
-    if(edgeEl) {
-      edgeEl.setAttribute('stroke', loop.color);
-      edgeEl.setAttribute('stroke-width', '2.5');
-      edgeEl.setAttribute('stroke-opacity', '0.9');
-      edgeEl.setAttribute('marker-end', `url(#arrow-${loopId})`);
-    }
-  });
-
-  const loopNodeIds = new Set(loop.nodes);
-  loopNodeIds.forEach(nid => {
-    const nodeEl = document.querySelector(`.node[data-id="${nid}"]`);
-    const labelEls = document.querySelectorAll(`.label-${nid}`);
-    if(nodeEl) {
-      nodeEl.setAttribute('fill-opacity','1');
-      nodeEl.setAttribute('stroke-opacity','1');
-      nodeEl.setAttribute('stroke', loop.color);
-      nodeEl.setAttribute('stroke-width','2.5');
-    }
-    labelEls.forEach(el => el.setAttribute('opacity','1'));
-  });
-
-  gLayer.innerHTML = '';
-  loop.edges.forEach(([fromId,toId]) => {
-    const fromNode = NODES.find(n=>n.id===fromId);
-    const toNode   = NODES.find(n=>n.id===toId);
-    if(!fromNode||!toNode) return;
-    const [x1,y1] = getPos(fromId);
-    const [x2,y2] = getPos(toId);
-    const r1 = fromNode.r * Math.min(scaleX,scaleY);
-    const angle0 = Math.atan2(y2-y1, x2-x1);
-    const sx = x1 + Math.cos(angle0)*r1;
-    const sy = y1 + Math.sin(angle0)*r1;
-
-    const glowPath = svgEl('path', {
-      d: edgePath(sx,sy,x2,y2),
-      fill: 'none',
-      stroke: loop.color,
-      'stroke-width': '6',
-      'stroke-opacity': '0.15',
-    });
-    gLayer.appendChild(glowPath);
-  });
-
-  const labelPos = getLoopLabelPos(loop.nodes);
-  const loopLabel = svgEl('text', {
-    x: labelPos[0],
-    y: labelPos[1],
-    'text-anchor':'middle',
-    fill: loop.color,
-    'font-family': 'Syne, sans-serif',
-    'font-weight': '800',
-    'font-size': `${Math.max(11, 14*Math.min(scaleX,scaleY))}px`,
-    opacity: '0.8'
-  });
-  loopLabel.textContent = loop.label;
-  llayer.appendChild(loopLabel);
-
-  const panel = document.getElementById('info-panel');
+  // Info panel
   const labelEl = document.getElementById('info-loop-label');
   labelEl.textContent = `${loop.label} · Reinforcing Loop`;
-  labelEl.style.color = loop.color;
+  labelEl.style.color  = loop.color;
   document.getElementById('info-loop-name').textContent = loop.name;
   document.getElementById('info-loop-desc').textContent = loop.desc;
 
@@ -1060,63 +1034,76 @@ function highlightLoop(loopId) {
   pathEl.innerHTML = '';
   const uniqueNodes = [...new Set(loop.nodes)];
   uniqueNodes.forEach((nid, i) => {
-    const n = NODES.find(x=>x.id===nid);
-    if(!n) return;
+    const n = nodeMap[nid];
+    if (!n) return;
     const span = document.createElement('span');
-    span.className = 'path-node';
-    span.textContent = n.label.replace('\n',' ');
+    span.className   = 'path-node';
+    span.textContent = n.label.replace('\n', ' ');
     span.style.borderColor = loop.color;
-    span.style.color = loop.color;
+    span.style.color       = loop.color;
     pathEl.appendChild(span);
-    if(i < uniqueNodes.length-1) {
+    if (i < uniqueNodes.length - 1) {
       const arr = document.createElement('span');
-      arr.className = 'path-arrow';
+      arr.className   = 'path-arrow';
       arr.textContent = '→';
       arr.style.color = loop.color;
       pathEl.appendChild(arr);
     }
   });
 
-  panel.classList.remove('hidden');
+  document.getElementById('info-panel').classList.remove('hidden');
+
+  // Sequential node pulse — causality travels visibly around the cycle
+  setTimeout(() => pulseLoopNodes(loopId), 100);
 }
 
-function getLoopLabelPos(nodeIds) {
-  let sumX=0, sumY=0, count=0;
-  new Set(nodeIds).forEach(id => {
-    const [x,y] = getPos(id);
-    sumX+=x; sumY+=y; count++;
+function loopLabelPos(loopId) {
+  const ids = [...new Set(LOOPS[loopId].nodes)];
+  let sx = 0, sy = 0;
+  ids.forEach(id => { sx += LAYOUT[id][0]; sy += LAYOUT[id][1]; });
+  return [sx / ids.length, sy / ids.length - 20];
+}
+
+function pulseLoopNodes(loopId) {
+  const path = [...new Set(LOOPS[loopId].nodes)];
+  path.forEach((nodeId, i) => {
+    setTimeout(() => {
+      const origR = nodeMap[nodeId].r;
+      nodeGroups.filter(d => d.id === nodeId)
+        .select('.node-main')
+        .transition().duration(200).attr('r', origR * 1.4)
+        .transition().duration(300).attr('r', origR);
+    }, i * 200);
   });
-  return [sumX/count, sumY/count - 20*Math.min(scaleX,scaleY)];
 }
 
 function clearHighlight() {
   activeLoop = null;
-  document.querySelectorAll('.loop-btn').forEach(b => b.classList.remove('active-r1','active-r2','active-r3','active-r4'));
+  document.querySelectorAll('.loop-btn').forEach(b =>
+    b.classList.remove('active-r1','active-r2','active-r3','active-r4')
+  );
   document.getElementById('btn-clear').style.display = 'none';
   document.getElementById('info-panel').classList.add('hidden');
-  gLayer.innerHTML = '';
-  llayer.innerHTML = '';
 
-  document.querySelectorAll('.edge').forEach(el => {
-    el.setAttribute('stroke', 'rgba(100,140,104,0.28)');
-    el.setAttribute('stroke-width', '1.2');
-    el.setAttribute('stroke-opacity', '1');
-    el.setAttribute('marker-end', 'url(#arrow-default)');
-  });
-  document.querySelectorAll('.node').forEach(el => {
-    el.setAttribute('fill-opacity','0.85');
-    el.setAttribute('stroke-opacity','0.6');
-    el.setAttribute('stroke', el.getAttribute('fill'));
-    el.setAttribute('stroke-width','1.5');
-  });
-  document.querySelectorAll('.node-label').forEach(el => el.setAttribute('opacity','1'));
+  loopGlowLayer.selectAll('*').remove();
+  loopLabelLayer.selectAll('*').remove();
+
+  edgesLayer.selectAll('.edge')
+    .classed('loop-active', false)
+    .attr('stroke', 'rgba(100,140,104,0.28)')
+    .attr('stroke-width', 1.2)
+    .attr('stroke-opacity', 1)
+    .attr('marker-end', 'url(#arrow-default)');
+
+  // Reset node circles to their original fill color
+  nodeGroups.select('.node-main')
+    .attr('fill-opacity', 0.85)
+    .attr('stroke-opacity', 0.6)
+    .attr('stroke-width', 1.5)
+    .attr('stroke', function() { return this.getAttribute('data-color'); });
+
+  nodeGroups.selectAll('.node-label').attr('opacity', 1);
 }
-
-// ═══════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════
-window.addEventListener('resize', resize);
-resize();
 </script>
 </body>
 </html>
